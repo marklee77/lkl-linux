@@ -10,6 +10,12 @@ CC=gcc
 endif
 
 OUTPUT_FORMAT=$(shell $(LD) -r -print-output-format)
+RUMP_PREFIX?=$(abspath ../..//../buildrump.sh/obj/dest.stage)
+RUMP_INCLUDE=$(RUMP_PREFIX)/usr/include
+RUMP_LIB=$(RUMP_PREFIX)/usr/lib
+
+LDFLAGS += -L$(RUMP_LIB) -Wl,-rpath,$(RUMP_LIB)
+LDFLAGS += -lrumpuser
 
 lib_source = $(filter-out %-host.c,$(wildcard lib/*.c))
 source = $(wildcard tests/*.c)
@@ -18,7 +24,7 @@ ifneq (,$(filter $(OUTPUT_FORMAT),elf64-x86-64 elf32-i386 elf64-x86-64-freebsd))
 source += $(wildcard *.c)
 lib_source += lib/posix-host.c
 CFLAGS += -fPIC
-LDFLAGS += -lpthread -lrt
+LDFLAGS += -lpthread -lrt -ldl
 source += $(wildcard *.c)
 execs =  cpfromfs
 lib += lib/liblkl.so
@@ -36,6 +42,13 @@ endif
 lib_objs = $(patsubst %.c,%.o, $(lib_source))
 objs = $(patsubst %.c,%.o, $(source))
 execs += $(patsubst %.c,%, $(source))
+
+install:
+	install -D lib/liblkl.a ${DESTDIR}/lib/
+	mkdir -p ${DESTDIR}/include/linux/
+	install -D ../../arch/lkl/include/generated/linux/rump_syscalls.h \
+		${DESTDIR}/include/linux/
+
 
 all: $(lib) $(execs)
 

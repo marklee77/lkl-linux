@@ -3,10 +3,14 @@
 #include <linux/console.h>
 #include <asm/host_ops.h>
 
+#include "rump.h"
+
 static void console_write(struct console *con, const char *str, unsigned len)
 {
-	if (lkl_ops->print)
-		lkl_ops->print(str, len);
+	while (len-- > 0) {
+		rumpuser_putchar(*str);
+		str++;
+	}
 }
 
 #ifdef CONFIG_LKL_EARLY_CONSOLE
@@ -37,5 +41,5 @@ int __init lkl_console_init(void)
 	register_console(&lkl_console);
 	return 0;
 }
-core_initcall(lkl_console_init);
+//core_initcall(lkl_console_init);
 

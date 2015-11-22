@@ -54,6 +54,10 @@ config RWSEM_GENERIC_SPINLOCK
 	bool
 	default y
 
+#config PCI
+#	bool "PCI support"
+#	default y
+
 source init/Kconfig
 
 source net/Kconfig

@@ -2,6 +2,8 @@
 #include <linux/mm.h>
 #include <linux/swap.h>
 
+#include "rump.h"
+
 unsigned long memory_start, memory_end;
 static unsigned long _memory_start, mem_size;
 
@@ -11,7 +13,7 @@ void __init bootmem_init(int mem_size)
 {
 	int bootmap_size;
 
-	_memory_start = (unsigned long)lkl_ops->mem_alloc(mem_size);
+	rumpuser_malloc(mem_size, 0, (void **)&_memory_start);
 	memory_start = _memory_start;
 	BUG_ON(!memory_start);
 	memory_end = memory_start + mem_size;
@@ -68,5 +70,5 @@ void free_initmem(void)
 
 void free_mem(void)
 {
-	lkl_ops->mem_free((void *)_memory_start);
+	rumpuser_free((void *)_memory_start, -1);
 }

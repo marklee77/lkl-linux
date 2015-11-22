@@ -18,16 +18,32 @@ else
 NPROC=$(shell nproc)
 endif
 
+# rump libraries
+RUMP_PREFIX?=$(abspath $(srctree)/../buildrump.sh/obj/dest.stage)
+RUMP_INCLUDE=$(RUMP_PREFIX)/usr/include
+RUMP_LIB=$(RUMP_PREFIX)/usr/lib
+RUMP?=yes
+ifneq ($(wildcard $(RUMP_PREFIX)/.),)
+KBUILD_CFLAGS += -I$(RUMP_INCLUDE) -DRUMPUSER -DLIBRUMPUSER -D_KERNEL
+KBUILD_CFLAGS += -isystem $(RUMP_INCLUDE)
+else
+RUMP=no
+$(error "Couldn't found $(RUMP_PREFIX)")
+endif
+
+
 LDFLAGS_vmlinux += -r
 LKL_ENTRY_POINTS := lkl_start_kernel lkl_sys_halt lkl_syscall lkl_trigger_irq \
-	lkl_get_free_irq lkl_put_irq
+	lkl_get_free_irq lkl_put_irq rump_init
 
 core-y += arch/lkl/kernel/
+#core-y += arch/lkl/drivers/
 
 all: lkl.o
 
-lkl.o: vmlinux
-	$(OBJCOPY) -R .eh_frame $(foreach sym,$(LKL_ENTRY_POINTS),-G$(prefix)$(sym)) vmlinux lkl.o
+lkl.o: arch/lkl/kernel/rump_syscalls.c vmlinux
+#	$(OBJCOPY) -R .eh_frame $(foreach sym,$(LKL_ENTRY_POINTS),-G$(prefix)$(sym)) vmlinux lkl.o
+	$(OBJCOPY) -R .eh_frame -L __start___ex_table -L __stop___ex_table vmlinux lkl.o
 
 install: lkl.o __headers
 	@echo "  INSTALL	$(INSTALL_PATH)/lib/lkl.o"
