@@ -165,7 +165,7 @@ ${ret} rump___sysimpl_${funcname}(${args})
 EOF
 
 	for i in {1..6} ; do
-	    if [ $i -ge ${count} ] ; then
+	    if [ $i -gt ${count} ] ; then
 		break
 	    fi
 	    param=$(echo ${arg[$((i-1))]} | sed "s/.* \(.*\)$/\1/")

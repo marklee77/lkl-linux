@@ -451,11 +451,9 @@ int rump_init(void)
 	rumpuser_cv_init(&thrcv);
 	threads_are_go = false;
 
-	rump_early_consdev_init();
 	lkl_start_kernel(NULL, LKL_MEM_SIZE, boot_cmdline);
 
 	rump_thread_allow(NULL);
-	rump_consdev_init();
 #ifdef ENABLE_SYSPROXY
 	rump_sysproxy_init();
 #endif

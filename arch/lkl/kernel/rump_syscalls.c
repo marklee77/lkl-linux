@@ -71,6 +71,7 @@ long rump___sysimpl_write(unsigned int fd, const char * buf, size_t count)
 	memset(params, 0, sizeof(params));
 	params[0] = (long)fd;
 	params[1] = (long)buf;
+	params[2] = (long)count;
 
 	ret = lkl_syscall(__NR_write, params);
 	/* errno handling */
@@ -93,6 +94,7 @@ long rump___sysimpl_close(unsigned int fd)
 	long params[6];
 
 	memset(params, 0, sizeof(params));
+	params[0] = (long)fd;
 
 	ret = lkl_syscall(__NR_close, params);
 	/* errno handling */
@@ -115,6 +117,7 @@ long rump___sysimpl_unlink(const char * pathname)
 	long params[6];
 
 	memset(params, 0, sizeof(params));
+	params[0] = (long)pathname;
 
 	ret = lkl_syscall(__NR_unlink, params);
 	/* errno handling */
@@ -139,6 +142,7 @@ long rump___sysimpl_open(const char * filename, int flags, umode_t mode)
 	memset(params, 0, sizeof(params));
 	params[0] = (long)filename;
 	params[1] = (long)flags;
+	params[2] = (long)mode;
 
 	ret = lkl_syscall(__NR_open, params);
 	/* errno handling */
@@ -162,6 +166,7 @@ long rump___sysimpl_creat(const char * filename, umode_t mode)
 
 	memset(params, 0, sizeof(params));
 	params[0] = (long)filename;
+	params[1] = (long)mode;
 
 	ret = lkl_syscall(__NR_creat, params);
 	/* errno handling */
@@ -186,6 +191,7 @@ long rump___sysimpl_poll(void * ufds, unsigned int nfds, int timeout)
 	memset(params, 0, sizeof(params));
 	params[0] = (long)ufds;
 	params[1] = (long)nfds;
+	params[2] = (long)timeout;
 
 	ret = lkl_syscall(__NR_poll, params);
 	/* errno handling */
@@ -210,6 +216,7 @@ long rump___sysimpl_read(unsigned int fd, char * buf, size_t count)
 	memset(params, 0, sizeof(params));
 	params[0] = (long)fd;
 	params[1] = (long)buf;
+	params[2] = (long)count;
 
 	ret = lkl_syscall(__NR_read, params);
 	/* errno handling */
@@ -233,6 +240,7 @@ long rump___sysimpl_rename(const char * oldname, const char * newname)
 
 	memset(params, 0, sizeof(params));
 	params[0] = (long)oldname;
+	params[1] = (long)newname;
 
 	ret = lkl_syscall(__NR_rename, params);
 	/* errno handling */
@@ -256,6 +264,7 @@ long rump___sysimpl_flock(unsigned int fd, unsigned int cmd)
 
 	memset(params, 0, sizeof(params));
 	params[0] = (long)fd;
+	params[1] = (long)cmd;
 
 	ret = lkl_syscall(__NR_flock, params);
 	/* errno handling */
@@ -279,6 +288,7 @@ long rump___sysimpl_chmod(const char * filename, umode_t mode)
 
 	memset(params, 0, sizeof(params));
 	params[0] = (long)filename;
+	params[1] = (long)mode;
 
 	ret = lkl_syscall(__NR_chmod, params);
 	/* errno handling */
@@ -302,6 +312,7 @@ long rump___sysimpl_mkdir(const char * pathname, umode_t mode)
 
 	memset(params, 0, sizeof(params));
 	params[0] = (long)pathname;
+	params[1] = (long)mode;
 
 	ret = lkl_syscall(__NR_mkdir, params);
 	/* errno handling */
@@ -324,6 +335,7 @@ long rump___sysimpl_rmdir(const char * pathname)
 	long params[6];
 
 	memset(params, 0, sizeof(params));
+	params[0] = (long)pathname;
 
 	ret = lkl_syscall(__NR_rmdir, params);
 	/* errno handling */
@@ -348,6 +360,7 @@ long rump___sysimpl_getdents64(unsigned int fd, void * dirent, unsigned int size
 	memset(params, 0, sizeof(params));
 	params[0] = (long)fd;
 	params[1] = (long)dirent;
+	params[2] = (long)size;
 
 	ret = lkl_syscall(__NR_getdents64, params);
 	/* errno handling */
@@ -371,6 +384,7 @@ long rump___sysimpl_utimes(const char * filename, struct timeval * utimes)
 
 	memset(params, 0, sizeof(params));
 	params[0] = (long)filename;
+	params[1] = (long)utimes;
 
 	ret = lkl_syscall(__NR_utimes, params);
 	/* errno handling */
@@ -394,6 +408,7 @@ long rump___sysimpl_nanosleep(struct timespec * rqtp, struct timespec * rmtp)
 
 	memset(params, 0, sizeof(params));
 	params[0] = (long)rqtp;
+	params[1] = (long)rmtp;
 
 	ret = lkl_syscall(__NR_nanosleep, params);
 	/* errno handling */
@@ -418,6 +433,7 @@ long rump___sysimpl_mknod(const char * filename, umode_t mode, unsigned int dev)
 	memset(params, 0, sizeof(params));
 	params[0] = (long)filename;
 	params[1] = (long)mode;
+	params[2] = (long)dev;
 
 	ret = lkl_syscall(__NR_mknod, params);
 	/* errno handling */
@@ -444,6 +460,7 @@ long rump___sysimpl_mount(const char * dev_name, const char * dir_name, const ch
 	params[1] = (long)dir_name;
 	params[2] = (long)type;
 	params[3] = (long)flags;
+	params[4] = (long)data;
 
 	ret = lkl_syscall(__NR_mount, params);
 	/* errno handling */
@@ -467,6 +484,7 @@ long rump___sysimpl_umount(const char * name, int flags)
 
 	memset(params, 0, sizeof(params));
 	params[0] = (long)name;
+	params[1] = (long)flags;
 
 	ret = lkl_syscall(__NR_umount, params);
 	/* errno handling */
@@ -489,6 +507,7 @@ long rump___sysimpl_chdir(const char * filename)
 	long params[6];
 
 	memset(params, 0, sizeof(params));
+	params[0] = (long)filename;
 
 	ret = lkl_syscall(__NR_chdir, params);
 	/* errno handling */
@@ -511,6 +530,7 @@ long rump___sysimpl_chroot(const char * filename)
 	long params[6];
 
 	memset(params, 0, sizeof(params));
+	params[0] = (long)filename;
 
 	ret = lkl_syscall(__NR_chroot, params);
 	/* errno handling */
@@ -534,6 +554,7 @@ long rump___sysimpl_getcwd(char * buf, unsigned long size)
 
 	memset(params, 0, sizeof(params));
 	params[0] = (long)buf;
+	params[1] = (long)size;
 
 	ret = lkl_syscall(__NR_getcwd, params);
 	/* errno handling */
@@ -557,6 +578,7 @@ long rump___sysimpl_utime(const char * filename, const struct utimbuf * buf)
 
 	memset(params, 0, sizeof(params));
 	params[0] = (long)filename;
+	params[1] = (long)buf;
 
 	ret = lkl_syscall(__NR_utime, params);
 	/* errno handling */
@@ -581,6 +603,7 @@ long rump___sysimpl_ioctl(unsigned int fd, unsigned int cmd, unsigned long arg)
 	memset(params, 0, sizeof(params));
 	params[0] = (long)fd;
 	params[1] = (long)cmd;
+	params[2] = (long)arg;
 
 	ret = lkl_syscall(__NR_ioctl, params);
 	/* errno handling */
@@ -603,6 +626,7 @@ long rump___sysimpl_umask(int mask)
 	long params[6];
 
 	memset(params, 0, sizeof(params));
+	params[0] = (long)mask;
 
 	ret = lkl_syscall(__NR_umask, params);
 	/* errno handling */
@@ -670,6 +694,7 @@ long rump___sysimpl_access(const char * filename, int mode)
 
 	memset(params, 0, sizeof(params));
 	params[0] = (long)filename;
+	params[1] = (long)mode;
 
 	ret = lkl_syscall(__NR_access, params);
 	/* errno handling */
@@ -693,6 +718,7 @@ long rump___sysimpl_truncate(const char * path, long length)
 
 	memset(params, 0, sizeof(params));
 	params[0] = (long)path;
+	params[1] = (long)length;
 
 	ret = lkl_syscall(__NR_truncate, params);
 	/* errno handling */
@@ -741,6 +767,7 @@ long rump___sysimpl_llseek(unsigned int fd, unsigned long offset_high, unsigned 
 	params[1] = (long)offset_high;
 	params[2] = (long)offset_low;
 	params[3] = (long)result;
+	params[4] = (long)whence;
 
 	ret = lkl_syscall(__NR_llseek, params);
 	/* errno handling */
@@ -764,6 +791,7 @@ long rump___sysimpl_fstat64(unsigned long fd, struct stat64 * statbuf)
 
 	memset(params, 0, sizeof(params));
 	params[0] = (long)fd;
+	params[1] = (long)statbuf;
 
 	ret = lkl_syscall(__NR_fstat64, params);
 	/* errno handling */
@@ -789,6 +817,7 @@ long rump___sysimpl_fstatat64(unsigned int dfd, const char * filname, struct sta
 	params[0] = (long)dfd;
 	params[1] = (long)filname;
 	params[2] = (long)statbuf;
+	params[3] = (long)flag;
 
 	ret = lkl_syscall(__NR_fstatat64, params);
 	/* errno handling */
@@ -812,6 +841,7 @@ long rump___sysimpl_stat64(const char * filename, struct stat64 * statbuf)
 
 	memset(params, 0, sizeof(params));
 	params[0] = (long)filename;
+	params[1] = (long)statbuf;
 
 	ret = lkl_syscall(__NR_stat64, params);
 	/* errno handling */
@@ -835,6 +865,7 @@ long rump___sysimpl_lstat64(const char * filename, struct stat64 * statbuf)
 
 	memset(params, 0, sizeof(params));
 	params[0] = (long)filename;
+	params[1] = (long)statbuf;
 
 	ret = lkl_syscall(__NR_lstat64, params);
 	/* errno handling */
@@ -859,6 +890,7 @@ long rump___sysimpl_statfs64(const char * path, size_t sz, struct statfs64 * buf
 	memset(params, 0, sizeof(params));
 	params[0] = (long)path;
 	params[1] = (long)sz;
+	params[2] = (long)buf;
 
 	ret = lkl_syscall(__NR_statfs64, params);
 	/* errno handling */
@@ -883,6 +915,7 @@ long rump___sysimpl_readlink(const char * path, char * buf, int bufsiz)
 	memset(params, 0, sizeof(params));
 	params[0] = (long)path;
 	params[1] = (long)buf;
+	params[2] = (long)bufsiz;
 
 	ret = lkl_syscall(__NR_readlink, params);
 	/* errno handling */
@@ -907,6 +940,7 @@ long rump___sysimpl_listxattr(const char * path, char * list, int bufsiz)
 	memset(params, 0, sizeof(params));
 	params[0] = (long)path;
 	params[1] = (long)list;
+	params[2] = (long)bufsiz;
 
 	ret = lkl_syscall(__NR_listxattr, params);
 	/* errno handling */
@@ -931,6 +965,7 @@ long rump___sysimpl_llistxattr(const char * path, char * list, int bufsiz)
 	memset(params, 0, sizeof(params));
 	params[0] = (long)path;
 	params[1] = (long)list;
+	params[2] = (long)bufsiz;
 
 	ret = lkl_syscall(__NR_llistxattr, params);
 	/* errno handling */
@@ -955,6 +990,7 @@ long rump___sysimpl_flistxattr(int fd, char * list, int bufsiz)
 	memset(params, 0, sizeof(params));
 	params[0] = (long)fd;
 	params[1] = (long)list;
+	params[2] = (long)bufsiz;
 
 	ret = lkl_syscall(__NR_flistxattr, params);
 	/* errno handling */
@@ -980,6 +1016,7 @@ long rump___sysimpl_getxattr(const char * path, const char * name, void * value,
 	params[0] = (long)path;
 	params[1] = (long)name;
 	params[2] = (long)value;
+	params[3] = (long)size;
 
 	ret = lkl_syscall(__NR_getxattr, params);
 	/* errno handling */
@@ -1005,6 +1042,7 @@ long rump___sysimpl_lgetxattr(const char * path, const char * name, void * value
 	params[0] = (long)path;
 	params[1] = (long)name;
 	params[2] = (long)value;
+	params[3] = (long)size;
 
 	ret = lkl_syscall(__NR_lgetxattr, params);
 	/* errno handling */
@@ -1030,6 +1068,7 @@ long rump___sysimpl_fgetxattr(int fd, const char * name, void * value, size_t si
 	params[0] = (long)fd;
 	params[1] = (long)name;
 	params[2] = (long)value;
+	params[3] = (long)size;
 
 	ret = lkl_syscall(__NR_fgetxattr, params);
 	/* errno handling */
@@ -1056,6 +1095,7 @@ long rump___sysimpl_setxattr(const char * path, const char * name, const void * 
 	params[1] = (long)name;
 	params[2] = (long)value;
 	params[3] = (long)size;
+	params[4] = (long)flags;
 
 	ret = lkl_syscall(__NR_setxattr, params);
 	/* errno handling */
@@ -1082,6 +1122,7 @@ long rump___sysimpl_lsetxattr(const char * path, const char * name, const void *
 	params[1] = (long)name;
 	params[2] = (long)value;
 	params[3] = (long)size;
+	params[4] = (long)flags;
 
 	ret = lkl_syscall(__NR_lsetxattr, params);
 	/* errno handling */
@@ -1108,6 +1149,7 @@ long rump___sysimpl_fsetxattr(int fd, const char * name, const void * value, siz
 	params[1] = (long)name;
 	params[2] = (long)value;
 	params[3] = (long)size;
+	params[4] = (long)flags;
 
 	ret = lkl_syscall(__NR_fsetxattr, params);
 	/* errno handling */
@@ -1131,6 +1173,7 @@ long rump___sysimpl_symlink(const char * oldname, const char * newname)
 
 	memset(params, 0, sizeof(params));
 	params[0] = (long)oldname;
+	params[1] = (long)newname;
 
 	ret = lkl_syscall(__NR_symlink, params);
 	/* errno handling */
@@ -1154,6 +1197,7 @@ long rump___sysimpl_link(const char * oldname, const char * newname)
 
 	memset(params, 0, sizeof(params));
 	params[0] = (long)oldname;
+	params[1] = (long)newname;
 
 	ret = lkl_syscall(__NR_link, params);
 	/* errno handling */
@@ -1178,6 +1222,7 @@ long rump___sysimpl_chown(const char * filename, uid32_t uid, gid32_t gid)
 	memset(params, 0, sizeof(params));
 	params[0] = (long)filename;
 	params[1] = (long)uid;
+	params[2] = (long)gid;
 
 	ret = lkl_syscall(__NR_chown, params);
 	/* errno handling */
@@ -1203,6 +1248,7 @@ long rump___sysimpl_pread64(unsigned int fd, char * buf, size_t count, loff_t po
 	params[0] = (long)fd;
 	params[1] = (long)buf;
 	params[2] = (long)count;
+	params[3] = (long)pos;
 
 	ret = lkl_syscall(__NR_pread64, params);
 	/* errno handling */
@@ -1228,6 +1274,7 @@ long rump___sysimpl_pwrite64(unsigned int fd, const char * buf, size_t count, lo
 	params[0] = (long)fd;
 	params[1] = (long)buf;
 	params[2] = (long)count;
+	params[3] = (long)pos;
 
 	ret = lkl_syscall(__NR_pwrite64, params);
 	/* errno handling */
@@ -1250,6 +1297,7 @@ long rump___sysimpl_fsync(unsigned int fd)
 	long params[6];
 
 	memset(params, 0, sizeof(params));
+	params[0] = (long)fd;
 
 	ret = lkl_syscall(__NR_fsync, params);
 	/* errno handling */
@@ -1272,6 +1320,7 @@ long rump___sysimpl_fdatasync(unsigned int fd)
 	long params[6];
 
 	memset(params, 0, sizeof(params));
+	params[0] = (long)fd;
 
 	ret = lkl_syscall(__NR_fdatasync, params);
 	/* errno handling */
@@ -1295,6 +1344,7 @@ long rump___sysimpl_removexattr(const char * path, const char * name)
 
 	memset(params, 0, sizeof(params));
 	params[0] = (long)path;
+	params[1] = (long)name;
 
 	ret = lkl_syscall(__NR_removexattr, params);
 	/* errno handling */
@@ -1320,6 +1370,7 @@ long rump___sysimpl_utimensat(int dirfd, const char * path, struct timespec * ut
 	params[0] = (long)dirfd;
 	params[1] = (long)path;
 	params[2] = (long)utimes;
+	params[3] = (long)flags;
 
 	ret = lkl_syscall(__NR_utimensat, params);
 	/* errno handling */
@@ -1345,6 +1396,7 @@ long rump___sysimpl_fallocate(int fd, int mode, loff_t offset, loff_t len)
 	params[0] = (long)fd;
 	params[1] = (long)mode;
 	params[2] = (long)offset;
+	params[3] = (long)len;
 
 	ret = lkl_syscall(__NR_fallocate, params);
 	/* errno handling */
@@ -1369,6 +1421,7 @@ long rump___sysimpl_socket(int family, int type, int protocol)
 	memset(params, 0, sizeof(params));
 	params[0] = (long)family;
 	params[1] = (long)type;
+	params[2] = (long)protocol;
 
 	ret = lkl_syscall(__NR_socket, params);
 	/* errno handling */
@@ -1393,6 +1446,7 @@ long rump___sysimpl_recvmsg(int fd, struct msghdr * msg, unsigned int flags)
 	memset(params, 0, sizeof(params));
 	params[0] = (long)fd;
 	params[1] = (long)msg;
+	params[2] = (long)flags;
 
 	ret = lkl_syscall(__NR_recvmsg, params);
 	/* errno handling */
@@ -1420,6 +1474,7 @@ long rump___sysimpl_recvfrom(int fd, void * ubuf, size_t size, unsigned int flag
 	params[2] = (long)size;
 	params[3] = (long)flags;
 	params[4] = (long)addr;
+	params[5] = (long)addr_len;
 
 	ret = lkl_syscall(__NR_recvfrom, params);
 	/* errno handling */
@@ -1447,6 +1502,7 @@ long rump___sysimpl_sendto(int fd, void * buff, size_t len, unsigned int flags, 
 	params[2] = (long)len;
 	params[3] = (long)flags;
 	params[4] = (long)addr;
+	params[5] = (long)addr_len;
 
 	ret = lkl_syscall(__NR_sendto, params);
 	/* errno handling */
@@ -1471,6 +1527,7 @@ long rump___sysimpl_sendmsg(int fd, struct msghdr * msg, unsigned int flags)
 	memset(params, 0, sizeof(params));
 	params[0] = (long)fd;
 	params[1] = (long)msg;
+	params[2] = (long)flags;
 
 	ret = lkl_syscall(__NR_sendmsg, params);
 	/* errno handling */
@@ -1496,6 +1553,7 @@ long rump___sysimpl_sendmmsg(int fd, struct mmsghdr * mmsg, unsigned int vlen, u
 	params[0] = (long)fd;
 	params[1] = (long)mmsg;
 	params[2] = (long)vlen;
+	params[3] = (long)flags;
 
 	ret = lkl_syscall(__NR_sendmmsg, params);
 	/* errno handling */
@@ -1520,6 +1578,7 @@ long rump___sysimpl_getsockname(int fd, struct sockaddr * usockaddr, void * usoc
 	memset(params, 0, sizeof(params));
 	params[0] = (long)fd;
 	params[1] = (long)usockaddr;
+	params[2] = (long)usockaddr_len;
 
 	ret = lkl_syscall(__NR_getsockname, params);
 	/* errno handling */
@@ -1544,6 +1603,7 @@ long rump___sysimpl_getpeername(int fd, struct sockaddr * usockaddr, int * usock
 	memset(params, 0, sizeof(params));
 	params[0] = (long)fd;
 	params[1] = (long)usockaddr;
+	params[2] = (long)usockaddr_len;
 
 	ret = lkl_syscall(__NR_getpeername, params);
 	/* errno handling */
@@ -1570,6 +1630,7 @@ long rump___sysimpl_setsockopt(int fd, int level, int optname, void * optval, in
 	params[1] = (long)level;
 	params[2] = (long)optname;
 	params[3] = (long)optval;
+	params[4] = (long)optlen;
 
 	ret = lkl_syscall(__NR_setsockopt, params);
 	/* errno handling */
@@ -1596,6 +1657,7 @@ long rump___sysimpl_getsockopt(int fd, int level, int optname, char * optval, in
 	params[1] = (long)level;
 	params[2] = (long)optname;
 	params[3] = (long)optval;
+	params[4] = (long)optlen;
 
 	ret = lkl_syscall(__NR_getsockopt, params);
 	/* errno handling */
@@ -1620,6 +1682,7 @@ long rump___sysimpl_bind(int fd, struct sockaddr * umyaddr, int addrlen)
 	memset(params, 0, sizeof(params));
 	params[0] = (long)fd;
 	params[1] = (long)umyaddr;
+	params[2] = (long)addrlen;
 
 	ret = lkl_syscall(__NR_bind, params);
 	/* errno handling */
@@ -1644,6 +1707,7 @@ long rump___sysimpl_connect(int fd, struct sockaddr * uservaddr, int addrlen)
 	memset(params, 0, sizeof(params));
 	params[0] = (long)fd;
 	params[1] = (long)uservaddr;
+	params[2] = (long)addrlen;
 
 	ret = lkl_syscall(__NR_connect, params);
 	/* errno handling */
@@ -1667,6 +1731,7 @@ long rump___sysimpl_listen(int fd, int backlog)
 
 	memset(params, 0, sizeof(params));
 	params[0] = (long)fd;
+	params[1] = (long)backlog;
 
 	ret = lkl_syscall(__NR_listen, params);
 	/* errno handling */
@@ -1691,6 +1756,7 @@ long rump___sysimpl_accept(int fd, struct sockaddr * upeer_sockaddr, int * upeer
 	memset(params, 0, sizeof(params));
 	params[0] = (long)fd;
 	params[1] = (long)upeer_sockaddr;
+	params[2] = (long)upeer_addrlen;
 
 	ret = lkl_syscall(__NR_accept, params);
 	/* errno handling */
@@ -1715,6 +1781,7 @@ long rump___sysimpl_writev(unsigned long fd, const struct iovec * vec, unsigned 
 	memset(params, 0, sizeof(params));
 	params[0] = (long)fd;
 	params[1] = (long)vec;
+	params[2] = (long)vlen;
 
 	ret = lkl_syscall(__NR_writev, params);
 	/* errno handling */
@@ -1739,6 +1806,7 @@ long rump___sysimpl_fcntl(unsigned int fd, unsigned int cmd, unsigned long arg)
 	memset(params, 0, sizeof(params));
 	params[0] = (long)fd;
 	params[1] = (long)cmd;
+	params[2] = (long)arg;
 
 	ret = lkl_syscall(__NR_fcntl, params);
 	/* errno handling */
@@ -1765,6 +1833,7 @@ long rump___sysimpl_select(int n, void * inp, void * outp, void * exp, struct ti
 	params[1] = (long)inp;
 	params[2] = (long)outp;
 	params[3] = (long)exp;
+	params[4] = (long)tvp;
 
 	ret = lkl_syscall(__NR_select, params);
 	/* errno handling */
@@ -1787,6 +1856,7 @@ long rump___sysimpl_epoll_create(int size)
 	long params[6];
 
 	memset(params, 0, sizeof(params));
+	params[0] = (long)size;
 
 	ret = lkl_syscall(__NR_epoll_create, params);
 	/* errno handling */
@@ -1812,6 +1882,7 @@ long rump___sysimpl_epoll_ctl(int epfd, int op, int fd, struct epoll_event * eve
 	params[0] = (long)epfd;
 	params[1] = (long)op;
 	params[2] = (long)fd;
+	params[3] = (long)event;
 
 	ret = lkl_syscall(__NR_epoll_ctl, params);
 	/* errno handling */
@@ -1837,6 +1908,7 @@ long rump___sysimpl_epoll_wait(int epfd, struct epoll_event * events, int maxeve
 	params[0] = (long)epfd;
 	params[1] = (long)events;
 	params[2] = (long)maxevents;
+	params[3] = (long)timeout;
 
 	ret = lkl_syscall(__NR_epoll_wait, params);
 	/* errno handling */
@@ -1860,6 +1932,7 @@ long rump___sysimpl_shutdown(int fd, int how)
 
 	memset(params, 0, sizeof(params));
 	params[0] = (long)fd;
+	params[1] = (long)how;
 
 	ret = lkl_syscall(__NR_shutdown, params);
 	/* errno handling */
@@ -1882,6 +1955,7 @@ long rump___sysimpl_pipe(int * fildes)
 	long params[6];
 
 	memset(params, 0, sizeof(params));
+	params[0] = (long)fildes;
 
 	ret = lkl_syscall(__NR_pipe, params);
 	/* errno handling */
