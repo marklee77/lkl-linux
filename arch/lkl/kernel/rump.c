@@ -10,9 +10,6 @@
 #include <asm/unistd.h>
 #include <asm/host_ops.h>
 
-#define RUMP_REGISTER_T long
-typedef RUMP_REGISTER_T register_t;
-
 #include "rump.h"
 
 /* FIXME: should be included from somewhere */
@@ -22,7 +19,6 @@ static bool threads_are_go;
 static struct rumpuser_mtx *thrmtx;
 static struct rumpuser_cv *thrcv;
 
-static void rump_libos_hyp_lwpexit(void);
 static struct lwp *rump_libos_lwproc_curlwp(void);
 static int rump_libos_lwproc_newlwp(pid_t pid);
 static void rump_libos_lwproc_switch(struct lwp *newlwp);
@@ -50,29 +46,6 @@ rump_daemonize_done(int error)
 {
 	return 0;
 }
-
-#if 0
-int
-rump_pub_etfs_register_withsize(const char *arg1, const char *arg2,
-				enum rump_etfs_type arg3,
-				uint64_t arg4, uint64_t arg5)
-{
-	return 0;
-}
-
-int
-rump_pub_etfs_register(const char *arg1, const char *arg2,
-		       enum rump_etfs_type arg3)
-{
-	return 0;
-}
-
-int
-rump_pub_etfs_remove(const char *arg1)
-{
-	return 0;
-}
-#endif
 
 int
 rump_pub_lwproc_rfork(int arg1)
@@ -128,9 +101,8 @@ rump_pub_lwproc_curlwp(void)
 	return rv;
 }
 
-
 int
-rump_syscall(int num, void *data, size_t dlen, register_t *retval)
+rump_syscall(int num, void *data, size_t dlen, long *retval)
 {
 	int ret = 0;
 
@@ -234,16 +206,14 @@ rump_libos_hyp_getpid(void)
 }
 
 
-static void rump_libos_schedule(void) {}
-static void rump_libos_unschedule(void) {}
 static void rump_libos_user_unschedule(int nlocks, int *countp,
 				       void *interlock) {}
 static void rump_libos_user_schedule(int nlocks, void *interlock) {}
 static void rump_libos_hyp_execnotify(const char *comm) {}
 
 static const struct rumpuser_hyperup hyp = {
-	.hyp_schedule		= rump_libos_schedule,
-	.hyp_unschedule		= rump_libos_unschedule,
+	.hyp_schedule		= rump_schedule,
+	.hyp_unschedule		= rump_unschedule,
 	.hyp_backend_unschedule	= rump_libos_user_unschedule,
 	.hyp_backend_schedule	= rump_libos_user_schedule,
 	.hyp_lwproc_switch	= rump_libos_lwproc_switch,
@@ -258,61 +228,8 @@ static const struct rumpuser_hyperup hyp = {
 	.hyp_execnotify		= rump_libos_hyp_execnotify,
 };
 
-void *rump_memcpy(void *dst, const void *src, unsigned long size)
-{
-	char *tmp = dst;
-	const char *s = src;
 
-	while (size--)
-		*tmp++ = *s++;
-	return dst;
-}
-
-void *rump_memset(void *dst, char value, unsigned long size)
-{
-	unsigned char *ptr = dst;
-
-	while (size--)
-		*ptr++ = (unsigned char)value;
-
-	return dst;
-}
-__u64 rump_current_ns(void)
-{
-	struct timespec tp;
-	static __u64 init_ns = -1;
-
-
-	if (rumpuser_clock_gettime(RUMPUSER_CLOCK_ABSMONO,
-				   (int64_t *)&tp.tv_sec,
-				   &tp.tv_nsec) == -1)
-		return init_ns;
-
-	if (init_ns == -1)
-		init_ns = tp.tv_sec * 1000000000 + tp.tv_nsec;
-
-	return tp.tv_sec * 1000000000 + tp.tv_nsec - init_ns;
-}
-
-unsigned long rump_random(void)
-{
-	unsigned long val, randlen;
-
-	rumpuser_getrandom(&val, sizeof(val), 0, &randlen);
-	return val;
-}
-
-void rump_signal_raised(int sig)
-{
-	static int logged = 0;
-
-	if (!logged) {
-		pr_warn("%s: Not implemented yet\n", __func__);
-		logged = 1;
-	}
-}
-
-struct thrdesc {
+static struct thrdesc {
 	void (*f)(void *);
 	void *arg;
 	int canceled;
@@ -353,6 +270,7 @@ static void *rump_timer_trampoline(void *arg)
 			goto end;
 		}
 		rumpuser_mutex_exit(td->mtx);
+		/* FIXME: we should not use rumpuser__errtrans here */
 		if (err && err != rumpuser__errtrans(ETIMEDOUT))
 			goto end;
 	}
@@ -415,23 +333,11 @@ void rump_timer_cancel(void *timer)
 void
 rump_thread_allow(struct lwp *l)
 {
-#ifdef notyet
-	struct thrdesc *td;
-#endif
-
 	rumpuser_mutex_enter(thrmtx);
 	if (l == NULL) {
 		threads_are_go = true;
-	} else {
-#ifdef notyet
-		TAILQ_FOREACH(td, &newthr, entries) {
-			if (td->newlwp == l) {
-				td->runnable = 1;
-				break;
-			}
-		}
-#endif
 	}
+
 	rumpuser_cv_broadcast(thrcv);
 	rumpuser_mutex_exit(thrmtx);
 }
@@ -454,6 +360,8 @@ int rump_init(void)
 	lkl_start_kernel(NULL, LKL_MEM_SIZE, boot_cmdline);
 
 	rump_thread_allow(NULL);
+	/* FIXME: rumprun doesn't have sysproxy.
+	 * maybe outsourced and linked -lsysproxy for hijack case ? */
 #ifdef ENABLE_SYSPROXY
 	rump_sysproxy_init();
 #endif

@@ -7,7 +7,6 @@
 
 #include <linux/stddef.h>
 #include <linux/types.h>
-#include <generated/compile.h>
 #include <generated/utsrelease.h>
 
 #include "rump.h"
@@ -16,7 +15,7 @@ extern struct rump_sysproxy_ops rump_sysproxy_ops;
 
 int rump_init_server(const char *url)
 {
-	return rumpuser_sp_init(url, "Linux", UTS_RELEASE, UTS_MACHINE);
+	return rumpuser_sp_init(url, "Linux", UTS_RELEASE, "libos");
 }
 
 void rump_sysproxy_init(void)

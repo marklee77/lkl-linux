@@ -506,7 +506,22 @@ static int start_lkl(void)
 	long ret;
 	char mpoint[32];
 
-	ret = lkl_start_kernel(&lkl_host_ops, lklfuse.mb * 1024 * 1024, "");
+	lklfuse.bs.fd = open(lklfuse.file, lklfuse.ro ? O_RDONLY : O_RDWR);
+	if (lklfuse.bs.fd < 0) {
+		fprintf(stderr, "can't open file %s: %s\n", lklfuse.file,
+			strerror(errno));
+		return -1;
+	}
+
+	ret = lkl_disk_add(lklfuse.bs);
+	if (ret < 0) {
+		fprintf(stderr, "can't add disk: %s\n", lkl_strerror(ret));
+		goto out_close;
+	}
+
+	lklfuse.disk_id = ret;
+
+	ret = rump_init();
 	if (ret) {
 		fprintf(stderr, "can't start kernel: %s\n", lkl_strerror(ret));
 		goto out;

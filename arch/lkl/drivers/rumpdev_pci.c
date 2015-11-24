@@ -1,5 +1,5 @@
 /*
- * rumprun PCI access (from src-netbsd/.../rumpdev_pci.c)
+ * rumprun PCI access (reused from src-netbsd/.../rumpdev_pci.c)
  */
 
 /*

@@ -43,12 +43,13 @@ lib_objs = $(patsubst %.c,%.o, $(lib_source))
 objs = $(patsubst %.c,%.o, $(source))
 execs += $(patsubst %.c,%, $(source))
 
+all: lib/liblkl.a $(execs)
+
 install:
 	install -D lib/liblkl.a ${DESTDIR}/lib/
 	mkdir -p ${DESTDIR}/include/linux/
 	install -D ../../arch/lkl/include/generated/linux/rump_syscalls.h \
 		${DESTDIR}/include/linux/
-
 
 all: $(lib) $(execs)
 
@@ -85,5 +86,10 @@ cpfromfs: cptofs
 test:
 	$(MAKE) -C tests
 
+<<<<<<< f5665b4ab188073bcfeab478bb5886b9bbc09648
 valgrind:
 	$(MAKE) -C tests valgrind
+=======
+.NOTPARALLEL : lib/lkl.o
+.PHONY: install
+>>>>>>> lkl: clean up code and fixes to pass make test

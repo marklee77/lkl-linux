@@ -17,9 +17,6 @@ void rump_sem_down(void *_sem);
 int rump_init(void);
 void rump_exit(void);
 
-void rump_early_consdev_init(void);
-void rump_consdev_init(void);
-
 void rump_sysproxy_init(void);
 void rump_sysproxy_fini(void);
 

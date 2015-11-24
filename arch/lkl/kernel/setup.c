@@ -61,9 +61,6 @@ int __init lkl_start_kernel(struct lkl_host_operations *ops,
 	int ret;
 	void *thr;
 
-	/* FIXME: unbind later */
-	lkl_ops = ops;
-
 	mem_size = _mem_size;
 
 	va_start(ap, fmt);

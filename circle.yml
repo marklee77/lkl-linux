@@ -9,13 +9,11 @@ dependencies:
     - cd ../buildrump.sh && git checkout linux-libos && ./buildrump.sh checkout
 
   post:
-    - cd ../buildrump.sh && ./buildrump.sh -l ../lkl-linux -o obj -d rump -qq -j16 fullbuild 
+    - cd ../buildrump.sh && ./buildrump.sh -l ../lkl-linux -o obj -d rump -qq -j16 fullbuild
 
 test:
   override:
-    # skip for a while: test was done by buildrump.sh
-    - cd tools/lkl
-    #- cd tools/lkl && make test
+    - cd tools/lkl && make test
     - ? >
         if [ -n "${RUN_NIGHTLY_BUILD}" ]; then
           cd tools/lkl && make valgrind;

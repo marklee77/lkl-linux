@@ -1,3 +1,4 @@
+/* Reused from src-netbsd/sys/rump/dev/lib/libpci/pci_user.h */
 /*
  * Possible userfeature macro flags:
  *
