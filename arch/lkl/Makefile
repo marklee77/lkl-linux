@@ -1,9 +1,11 @@
 include arch/lkl/auto.conf
 
 KBUILD_CFLAGS += -fno-builtin
+
+ifeq ($(RUMP_PREFIX),yes)
 # This will make liblkl.a huge (180MB~?)
 CFLAGS_KERNEL += -g3 -DDEBUG
-
+endif
 
 ifneq (,$(filter $(OUTPUT_FORMAT),elf64-x86-64 elf64-x86-64-freebsd))
 KBUILD_CFLAGS += -fPIC
@@ -42,13 +44,29 @@ LKL_ENTRY_POINTS := lkl_start_kernel lkl_sys_halt lkl_syscall lkl_trigger_irq \
 core-y += arch/lkl/kernel/
 core-y += arch/lkl/drivers/
 
-CFLAGS_main.o=-g -O0
+# objcopy trick is taken from rumpkernel
+GCCSYMBOLS=__umoddi3|__udivdi3
+VMLINUX_SYMS=__start___ex_table|__stop___ex_table|boot_cmdline
+EXP_SYMRENAME=rump|RUMP|bmk_|lib_|nuse_|lkl_|__tls|__initcall_start|__initcall_end|__gcov|_end|_GLOBAL_OFFSET_TABLE|${GCCSYMBOLS}'${_SYMQUIRK}'${RUMP_SYM_NORENAME:D|${RUMP_SYM_NORENAME}}|${VMLINUX_SYMS}
+
+define make_ns_symbols
+	@echo "OBJCPY	" $1 $2;	\
+	 ${Q} ${NM} -go $1 | awk ' 	\
+	$$NF!~/^'${_PQ}'(${EXP_SYMRENAME})/ \
+	{s=$$NF;sub(/^'${_PQ}'/, "&rumpns_", s); print $$NF, s}'\
+	| sort | uniq  > $2.renametab; \
+	$(OBJCOPY) -L __start___ex_table -L __stop___ex_table --preserve-dates \
+	 --redefine-syms $2.renametab $1 $2; \
+	rm -f $2.renametab
+endef
+
 
 all: lkl.o
 
 lkl.o: arch/lkl/kernel/rump_syscalls.c vmlinux
 #	$(OBJCOPY) -R .eh_frame $(foreach sym,$(LKL_ENTRY_POINTS),-G$(prefix)$(sym)) vmlinux lkl.o
 	$(OBJCOPY) -R .eh_frame -L __start___ex_table -L __stop___ex_table vmlinux lkl.o
+	$(call make_ns_symbols,vmlinux,lkl.o)
 
 install: lkl.o __headers
 	@echo "  INSTALL	$(INSTALL_PATH)/lib/lkl.o"

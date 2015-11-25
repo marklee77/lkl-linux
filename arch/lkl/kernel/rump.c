@@ -271,7 +271,8 @@ static void *rump_timer_trampoline(void *arg)
 		}
 		rumpuser_mutex_exit(td->mtx);
 		/* FIXME: we should not use rumpuser__errtrans here */
-		if (err && err != rumpuser__errtrans(ETIMEDOUT))
+		/* FIXME: 60=>ETIMEDOUT(netbsd) rumpuser__errtrans(ETIMEDOUT)) */
+		if (err && err != 60)
 			goto end;
 	}
 
@@ -344,12 +345,9 @@ rump_thread_allow(struct lwp *l)
 
 
 #define LKL_MEM_SIZE 100 * 1024 * 1024
+char *boot_cmdline = "";	/* FIXME: maybe we have rump_set_boot_cmdline? */
 int rump_init(void)
 {
-	const char *boot_cmdline = "initcall_debug=1 loglevel=10";
-	boot_cmdline = "loglevel=10";
-	boot_cmdline = "";
-
 	if (rumpuser_init(RUMPUSER_VERSION, &hyp) != 0) {
 		pr_warn("rumpuser init failed\n");
 		return EINVAL;

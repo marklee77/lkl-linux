@@ -44,6 +44,7 @@ struct thread_info *alloc_thread_info_node(struct task_struct *task, int node)
 	if (!ti)
 		return NULL;
 
+	memset(ti, 0, sizeof(*ti));
 	ti->exit_info = NULL;
 	ti->prev_sched = NULL;
 	ti->sched_sem = rump_sem_alloc(0);

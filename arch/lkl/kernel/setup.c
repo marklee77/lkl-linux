@@ -88,7 +88,7 @@ int __init lkl_start_kernel(struct lkl_host_operations *ops,
 	}
 
 	ret = rumpuser_thread_create((void * (*)(void *))lkl_run_kernel, NULL,
-				     "init", 0, 1, -1, &thr);
+				     "lkl_init", 0, 1, -1, &thr);
 	if (ret) {
 		ret = -ENOMEM;
 		goto out_free_idle_sem;
