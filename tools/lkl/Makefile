@@ -1,6 +1,6 @@
 CFLAGS := -Iinclude -Wall -g -O2 -Wextra -Wno-unused-parameter \
 	  -Wno-missing-field-initializers -fno-strict-aliasing -fPIC \
-	  -U_FORTIFY_SOURCE
+	  -U_FORTIFY_SOURCE -fno-stack-protector
 
 ifdef CROSS_COMPILE
 CC=$(CROSS_COMPILE)gcc
