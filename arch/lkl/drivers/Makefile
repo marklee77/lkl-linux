@@ -1,8 +1,13 @@
 
-#CFLAGS_rumpdev_pci.o=-I$(ARCH_DIR)/libpci/ -I$(srctree)/../src/common/include \
--I$(srctree)/../src/sys -I$(srctree)/../../rumprun/platform/hw/pci/
-
 obj-y = rumpdev_pci.o
 
-CFLAGS_rumpdev_pci.o=-g -O0
+# need to build with
+librumpdev_linux_pci.a: ${RUMP_BMK_PCI_HYPERCALLS}
+	rm -f $@
+	$(AR) rc $@ $^
 
+install: librumpdev_linux_pci.a
+	install -D librumpdev_linux_pci.a ${DESTDIR}/lib/
+
+
+.PHONY: ${RUMP_BMK_PCI_HYPERCALLS}

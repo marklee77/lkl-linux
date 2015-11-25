@@ -50,8 +50,8 @@ VMLINUX_SYMS=__start___ex_table|__stop___ex_table|boot_cmdline
 EXP_SYMRENAME=rump|RUMP|bmk_|lib_|nuse_|lkl_|__tls|__initcall_start|__initcall_end|__gcov|_end|_GLOBAL_OFFSET_TABLE|${GCCSYMBOLS}'${_SYMQUIRK}'${RUMP_SYM_NORENAME:D|${RUMP_SYM_NORENAME}}|${VMLINUX_SYMS}
 
 define make_ns_symbols
-	@echo "OBJCPY	" $1 $2;	\
-	 ${Q} ${NM} -go $1 | awk ' 	\
+	${Q}echo "  OBJCPY	" $1 $2;	\
+	${NM} -go $1 | awk ' 	\
 	$$NF!~/^'${_PQ}'(${EXP_SYMRENAME})/ \
 	{s=$$NF;sub(/^'${_PQ}'/, "&rumpns_", s); print $$NF, s}'\
 	| sort | uniq  > $2.renametab; \

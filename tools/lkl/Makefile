@@ -1,5 +1,6 @@
 CFLAGS := -Iinclude -Wall -g -O2 -Wextra -Wno-unused-parameter \
-	  -Wno-missing-field-initializers -fno-strict-aliasing
+	  -Wno-missing-field-initializers -fno-strict-aliasing -fPIC \
+	  -U_FORTIFY_SOURCE
 
 ifdef CROSS_COMPILE
 CC=$(CROSS_COMPILE)gcc
@@ -19,7 +20,7 @@ LDFLAGS += -lrumpuser
 
 lib_source = $(filter-out %-host.c,$(wildcard lib/*.c))
 source = $(wildcard tests/*.c)
-lib = lib/liblkl.a
+lib = lib/liblkl.a lib/liblinux.a
 ifneq (,$(filter $(OUTPUT_FORMAT),elf64-x86-64 elf32-i386 elf64-x86-64-freebsd))
 source += $(wildcard *.c)
 lib_source += lib/posix-host.c
@@ -43,10 +44,10 @@ lib_objs = $(patsubst %.c,%.o, $(lib_source))
 objs = $(patsubst %.c,%.o, $(source))
 execs += $(patsubst %.c,%, $(source))
 
-all: lib/liblkl.a $(execs)
+all: $(lib) $(execs)
 
 install:
-	install -D lib/liblkl.a ${DESTDIR}/lib/
+	install -D lib/liblinux.a ${DESTDIR}/lib/
 	mkdir -p ${DESTDIR}/include/linux/
 	install -D ../../arch/lkl/include/generated/linux/rump_syscalls.h \
 		${DESTDIR}/include/linux/
@@ -58,6 +59,9 @@ lib/liblkl.a: $(lib_objs) lib/lkl.o
 
 lib/liblkl.so: $(lib_objs) lib/lkl.o
 	gcc -o $@ -shared $^
+
+lib/liblinux.a: lib/lkl.o
+	$(AR) -rc $@ $^
 
 lib/lkl.o:
 	$(MAKE) -C ../.. ARCH=lkl defconfig

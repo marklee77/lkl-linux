@@ -13,6 +13,7 @@
 
 extern struct rump_sysproxy_ops rump_sysproxy_ops;
 
+#ifdef ENABLE_SYSPROXY
 int rump_init_server(const char *url)
 {
 	return rumpuser_sp_init(url, "Linux", UTS_RELEASE, "libos");
@@ -27,3 +28,4 @@ void rump_sysproxy_fini(void)
 {
 	rumpuser_sp_fini(NULL);
 }
+#endif
