@@ -229,7 +229,7 @@ static const struct rumpuser_hyperup hyp = {
 };
 
 
-static struct thrdesc {
+struct thrdesc {
 	void (*f)(void *);
 	void *arg;
 	int canceled;
@@ -346,7 +346,9 @@ rump_thread_allow(struct lwp *l)
 #define LKL_MEM_SIZE 100 * 1024 * 1024
 int rump_init(void)
 {
-	const char *boot_cmdline = "";
+	const char *boot_cmdline = "initcall_debug=1 loglevel=10";
+	boot_cmdline = "loglevel=10";
+	boot_cmdline = "";
 
 	if (rumpuser_init(RUMPUSER_VERSION, &hyp) != 0) {
 		pr_warn("rumpuser init failed\n");

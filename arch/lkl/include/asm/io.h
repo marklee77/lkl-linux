@@ -2,100 +2,66 @@
 #define _ASM_LKL_IO_H
 
 #include <asm/bug.h>
-#include <asm/host_ops.h>
 
-#define __raw_readb __raw_readb
-static inline u8 __raw_readb(const volatile void __iomem *addr)
+#ifndef outb
+#define outb outb
+static inline void outb(u8 v, u16 port)
 {
-	int ret;
-	u8 value;
-
-	ret = lkl_ops->iomem_access(addr, &value, sizeof(value), 0);
-	WARN(ret, "error reading iomem %p", addr);
-
-	return value;
+	asm volatile("outb %0,%1" : : "a" (v), "dN" (port));
 }
+#endif
 
-#define __raw_readw __raw_readw
-static inline u16 __raw_readw(const volatile void __iomem *addr)
+#ifndef outw
+#define outw outw
+static inline void outw(u16 v, u16 port)
 {
-	int ret;
-	u16 value;
-
-	ret = lkl_ops->iomem_access(addr, &value, sizeof(value), 0);
-	WARN(ret, "error reading iomem %p", addr);
-
-	return value;
+	asm volatile("outw %0,%1" : : "a" (v), "dN" (port));
 }
+#endif
 
-#define __raw_readl __raw_readl
-static inline u32 __raw_readl(const volatile void __iomem *addr)
+#ifndef outl
+#define outl outl
+static inline void outl(u32 v, u16 port)
 {
-	int ret;
-	u32 value;
-
-	ret = lkl_ops->iomem_access(addr, &value, sizeof(value), 0);
-	WARN(ret, "error reading iomem %p", addr);
-
-	return value;
+	asm volatile("outl %0,%1" : : "a" (v), "dN" (port));
 }
+#endif
 
-#ifdef CONFIG_64BIT
-#define __raw_readq __raw_readq
-static inline u64 __raw_readq(const volatile void __iomem *addr)
+#ifndef inb
+#define inb inb
+static inline u8 inb(u16 port)
 {
-	int ret;
-	u64 value;
-
-	ret = lkl_ops->iomem_access(addr, &value, sizeof(value), 0);
-	WARN(ret, "error reading iomem %p", addr);
-
-	return value;
+	u8 v;
+	asm volatile("inb %1,%0" : "=a" (v) : "dN" (port));
+	return v;
 }
-#endif /* CONFIG_64BIT */
+#endif
 
-#define __raw_writeb __raw_writeb
-static inline void __raw_writeb(u8 value, volatile void __iomem *addr)
+#ifndef inw
+#define inw inw
+static inline u16 inw(u16 port)
 {
-	int ret;
-
-	ret = lkl_ops->iomem_access(addr, &value, sizeof(value), 1);
-	WARN(ret, "error writing iomem %p", addr);
+	u16 v;
+	asm volatile("inw %1,%0" : "=a" (v) : "dN" (port));
+	return v;
 }
+#endif
 
-#define __raw_writew __raw_writew
-static inline void __raw_writew(u16 value, volatile void __iomem *addr)
+#ifndef inl
+#define inl inl
+static inline u32 inl(u16 port)
 {
-	int ret;
-
-	ret = lkl_ops->iomem_access(addr, &value, sizeof(value), 1);
-	WARN(ret, "error writing iomem %p", addr);
+	u32 v;
+	asm volatile("inl %1,%0" : "=a" (v) : "dN" (port));
+	return v;
 }
+#endif
 
-#define __raw_writel __raw_writel
-static inline void __raw_writel(u32 value, volatile void __iomem *addr)
-{
-	int ret;
-
-	ret = lkl_ops->iomem_access(addr, &value, sizeof(value), 1);
-	WARN(ret, "error writing iomem %p", addr);
-}
-
-#ifdef CONFIG_64BIT
-#define __raw_writeq __raw_writeq
-static inline void __raw_writeq(u64 value, volatile void __iomem *addr)
-{
-	int ret;
-
-	ret = lkl_ops->iomem_access(addr, &value, sizeof(value), 1);
-	WARN(ret, "error writing iomem %p", addr);
-}
-#endif /* CONFIG_64BIT */
 
 #define ioremap ioremap
 static inline void __iomem *ioremap(phys_addr_t offset, size_t size)
 {
-	return (void __iomem *)lkl_ops->ioremap(offset, size);
+	return (void __iomem *)(unsigned long)(offset);
 }
 
 #include <asm-generic/io.h>

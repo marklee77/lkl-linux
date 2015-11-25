@@ -4,3 +4,5 @@
 
 obj-y = rumpdev_pci.o
 
+CFLAGS_rumpdev_pci.o=-g -O0
+

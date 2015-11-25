@@ -35,6 +35,8 @@ static inline __must_check long __copy_from_user(void *to,
 	} else if (n) {
 #ifdef ENABLE_SYSPROXY
 		error = rumpuser_sp_copyin(ti->rump_client, from, to, n);
+#else
+		;
 #endif
 	}
 
@@ -61,6 +63,8 @@ static inline __must_check long __copy_to_user(void __user *to,
 	else if (n) {
 #ifdef ENABLE_SYSPROXY
 		error = rumpuser_sp_copyout(ti->rump_client, from, to, n);
+#else
+		;
 #endif
 	}
 

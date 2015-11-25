@@ -36,13 +36,44 @@
 
 #include "pci_user.h"
 
+struct rump_pci_sysdata {
+	int domain; /* PCI domain */
+};
+
+/* stubs: should not called */
+int __weak rumpcomp_pci_confread(unsigned bus, unsigned dev, unsigned fun,
+				 int reg, unsigned int *value)
+{
+	return 0;
+}
+
+int __weak rumpcomp_pci_confwrite(unsigned bus, unsigned dev, unsigned fun,
+				  int reg, unsigned int value)
+{
+	return 0;
+}
+
+void * __weak rumpcomp_pci_map(unsigned long addr, unsigned long len)
+{
+	return NULL;
+}
+
+
 /* from arch/x86/pci/common.c  */
 void pcibios_fixup_bus(struct pci_bus *b)
 {
 	pci_read_bridge_bases(b);
 }
 
-/* drivers/pci/access.c
+/* from arch/x86/pci/i386.c */
+resource_size_t
+pcibios_align_resource(void *data, const struct resource *res,
+		       resource_size_t size, resource_size_t align)
+{
+	return 0;
+}
+
+/* from drivers/pci/access.c
  *
  * @bus: PCI bus to scan
  * @devfn: slot number to scan (must have zero function.)
@@ -123,49 +154,7 @@ __strong_alias(pciide_machdep_compat_intr_disestablish,pci_intr_disestablish);
 #endif /* __HAVE_PCIIDE_MACHDEP_COMPAT_INTR_ESTABLISH */
 
 
-struct rump_pci_sysdata {
-	int domain; /* PCI domain */
-};
-
-
-/* from kernel/irq/manage.c */
-#if 0
-static int irq_thread(void *data)
-{
-	struct irqaction *action = data;
-	struct irq_desc *desc = irq_to_desc(action->irq);
-	irqreturn_t action_ret;
-
-	action_ret = action->thread_fn(action->irq, action->dev_id);
-	pr_info("IRQ handler returns %d\n", action_ret);
-
-	return 0;
-}
-
-int request_threaded_irq(unsigned int irq, irq_handler_t handler,
-			 irq_handler_t thread_fn, unsigned long irqflags,
-			 const char *devname, void *dev_id)
-{
-	int rv;
-	struct irqaction *action;
-
-	rv = rumpcomp_pci_irq_map(0xff, 0xff, 0xff, irq, irq);
-
-	action = kzalloc(sizeof(struct irqaction), GFP_KERNEL);
-	if (!action)
-		return -ENOMEM;
-
-	action->handler = handler;
-	action->thread_fn = thread_fn;
-	action->flags = irqflags;
-	action->name = devname;
-	action->dev_id = dev_id;
-
-	rumpcomp_pci_irq_establish(irq, irq_thread, action);
-	return 0;
-}
-#endif
-
+/* from drivers/pci/xen-pcifront.c */
 static int pci_lib_claim_resource(struct pci_dev *dev, void *data)
 {
 	int i;
@@ -221,4 +210,4 @@ rump_pci_init(void)
 
 	return 0;
 }
-device_initcall(rump_pci_init);
+subsys_initcall(rump_pci_init);

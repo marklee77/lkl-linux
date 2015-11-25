@@ -47,16 +47,19 @@ config GENERIC_CSUM
 config GENERIC_HWEIGHT
        def_bool y
 
-config NO_IOPORT_MAP
+config GENERIC_IOMAP
        def_bool y
+
+#config NO_IOPORT_MAP
+#       def_bool y
 
 config RWSEM_GENERIC_SPINLOCK
 	bool
 	default y
 
-#config PCI
-#	bool "PCI support"
-#	default y
+config PCI
+	bool "PCI support"
+	default y
 
 source init/Kconfig
 
@@ -67,6 +70,8 @@ source drivers/base/Kconfig
 source drivers/virtio/Kconfig
 
 source drivers/block/Kconfig
+
+source drivers/net/Kconfig
 
 source fs/Kconfig
 

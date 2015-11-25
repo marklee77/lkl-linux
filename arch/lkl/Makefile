@@ -1,6 +1,9 @@
 include arch/lkl/auto.conf
 
 KBUILD_CFLAGS += -fno-builtin
+# This will make liblkl.a huge (180MB~?)
+CFLAGS_KERNEL += -g3 -DDEBUG
+
 
 ifneq (,$(filter $(OUTPUT_FORMAT),elf64-x86-64 elf64-x86-64-freebsd))
 KBUILD_CFLAGS += -fPIC
@@ -37,7 +40,9 @@ LKL_ENTRY_POINTS := lkl_start_kernel lkl_sys_halt lkl_syscall lkl_trigger_irq \
 	lkl_get_free_irq lkl_put_irq rump_init
 
 core-y += arch/lkl/kernel/
-#core-y += arch/lkl/drivers/
+core-y += arch/lkl/drivers/
+
+CFLAGS_main.o=-g -O0
 
 all: lkl.o
 
