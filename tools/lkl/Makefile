@@ -15,9 +15,6 @@ RUMP_PREFIX?=$(abspath ../..//../buildrump.sh/obj/dest.stage)
 RUMP_INCLUDE=$(RUMP_PREFIX)/usr/include
 RUMP_LIB=$(RUMP_PREFIX)/usr/lib
 
-LDFLAGS += -L$(RUMP_LIB) -Wl,-rpath,$(RUMP_LIB)
-LDFLAGS += -lrumpuser
-
 lib_source = $(filter-out %-host.c,$(wildcard lib/*.c))
 source = $(wildcard tests/*.c)
 lib = lib/liblkl.a lib/liblinux.a
@@ -45,6 +42,12 @@ objs = $(patsubst %.c,%.o, $(source))
 execs += $(patsubst %.c,%, $(source))
 
 all: $(lib) $(execs)
+# if there is no librumpuser.a, then skip execs build
+ifeq (,$(wildcard $(RUMP_LIB)/librumpuser*))
+execs =
+else
+LDFLAGS += -L$(RUMP_LIB) -Wl,-rpath,$(RUMP_LIB) -lrumpuser
+endif
 
 install:
 	install -D lib/liblinux.a ${DESTDIR}/lib/
@@ -87,13 +90,14 @@ endif
 cpfromfs: cptofs
 	if ! [ -e $@ ]; then ln -s $< $@; fi
 
+# This is test only valid with librumpuser
+# libbmk_rumpuser can't test with this.
 test:
 	$(MAKE) -C tests
 
-<<<<<<< f5665b4ab188073bcfeab478bb5886b9bbc09648
 valgrind:
 	$(MAKE) -C tests valgrind
-=======
+
 .NOTPARALLEL : lib/lkl.o
 .PHONY: install
->>>>>>> lkl: clean up code and fixes to pass make test
+

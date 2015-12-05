@@ -1,10 +1,10 @@
 
-obj-y = rumpdev_pci.o
+obj-y = rumpdev_pci.o rumpdev_iomap.o
 
 # need to build with
 librumpdev_linux_pci.a: ${RUMP_BMK_PCI_HYPERCALLS}
 	rm -f $@
-	$(AR) rc $@ $^
+	$(AR) rc $@ ${RUMP_BMK_PCI_HYPERCALLS}
 
 install: librumpdev_linux_pci.a
 	install -D librumpdev_linux_pci.a ${DESTDIR}/lib/

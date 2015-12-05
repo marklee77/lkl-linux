@@ -33,6 +33,8 @@
 #include <linux/slab.h>
 #include <linux/interrupt.h>
 #include <linux/types.h>
+#include <linux/io.h>
+#include <asm/host_ops.h>
 
 #include "pci_user.h"
 
@@ -58,6 +60,24 @@ void * __weak rumpcomp_pci_map(unsigned long addr, unsigned long len)
 	return NULL;
 }
 
+int __weak rumpcomp_pci_irq_map(unsigned bus, unsigned device, unsigned fun,
+				int intrline, unsigned cookie)
+{
+	return 0;
+}
+
+void * __weak rumpcomp_pci_irq_establish(unsigned cookie,
+					 int (*handler)(void *), void *data)
+{
+	return NULL;
+}
+
+void __iomem *__pci_ioport_map(struct pci_dev *dev,
+			       unsigned long port, unsigned int nr)
+{
+	/* XXX: no care at the moment */
+	return rumpcomp_pci_map(port, nr);
+}
 
 /* from arch/x86/pci/common.c  */
 void pcibios_fixup_bus(struct pci_bus *b)
@@ -177,6 +197,34 @@ static int pci_lib_claim_resource(struct pci_dev *dev, void *data)
 	return 0;
 }
 
+static int rump_trigger_irq(void *arg)
+{
+	struct irq_data *data = arg;
+
+	lkl_trigger_irq(data->irq, data);
+	return 0;
+}
+
+int rump_pci_irq_request(struct irq_data *data)
+{
+	int ret, int_irq;
+	struct irq_desc *desc = irq_to_desc(data->irq);
+	const char *name = desc->name ? desc->name : "null"; /* XXX */
+
+	/* setup IRQ */
+	int_irq = lkl_get_free_irq(name);
+
+	ret = rumpcomp_pci_irq_map(0, 0, 0, data->irq, int_irq);
+	rumpcomp_pci_irq_establish(int_irq, rump_trigger_irq, data);
+
+	return 0;
+}
+
+void rump_pci_irq_release(struct irq_data *data)
+{
+	/* XXX: NOP */
+}
+
 struct pci_ops rump_pci_root_ops = {
 	.map_bus = rump_pci_map_bus,
 	.read = rump_pci_generic_read,
@@ -184,13 +232,11 @@ struct pci_ops rump_pci_root_ops = {
 };
 
 
-static int __init
-rump_pci_init(void)
+static int __init rump_pci_init(void)
 {
 	struct pci_bus *bus;
 	struct rump_pci_sysdata *sd;
 	int busnum = 0;
-	LIST_HEAD(resources);
 
 	sd = kzalloc(sizeof(*sd), GFP_KERNEL);
 	if (!sd) {
@@ -201,7 +247,6 @@ rump_pci_init(void)
 	printk(KERN_INFO "PCI: root bus %02x: using default resources\n", busnum);
 	bus = pci_scan_bus(busnum, &rump_pci_root_ops, sd);
 	if (!bus) {
-		pci_free_resource_list(&resources);
 		kfree(sd);
 		return -1;
 	}

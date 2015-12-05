@@ -47,11 +47,8 @@ config GENERIC_CSUM
 config GENERIC_HWEIGHT
        def_bool y
 
-config GENERIC_IOMAP
+config NO_IOPORT_MAP
        def_bool y
-
-#config NO_IOPORT_MAP
-#       def_bool y
 
 config RWSEM_GENERIC_SPINLOCK
 	bool
@@ -59,6 +56,8 @@ config RWSEM_GENERIC_SPINLOCK
 
 config PCI
 	bool "PCI support"
+	select NO_GENERIC_PCI_IOPORT_MAP
+	select GENERIC_PCI_IOMAP
 	default y
 
 source init/Kconfig

@@ -2,60 +2,59 @@
 #define _ASM_LKL_IO_H
 
 #include <asm/bug.h>
+#include "rump.h"
 
-#ifndef outb
-#define outb outb
-static inline void outb(u8 v, u16 port)
+#define __raw_readb __raw_readb
+static inline u8 __raw_readb(const volatile void __iomem *addr)
 {
-	asm volatile("outb %0,%1" : : "a" (v), "dN" (port));
+	return rump_io_readb(addr);
 }
-#endif
 
-#ifndef outw
-#define outw outw
-static inline void outw(u16 v, u16 port)
+#define __raw_readw __raw_readw
+static inline u16 __raw_readw(const volatile void __iomem *addr)
 {
-	asm volatile("outw %0,%1" : : "a" (v), "dN" (port));
+	return rump_io_readw(addr);
 }
-#endif
 
-#ifndef outl
-#define outl outl
-static inline void outl(u32 v, u16 port)
+#define __raw_readl __raw_readl
+static inline u32 __raw_readl(const volatile void __iomem *addr)
 {
-	asm volatile("outl %0,%1" : : "a" (v), "dN" (port));
+	return rump_io_readl(addr);
 }
-#endif
 
-#ifndef inb
-#define inb inb
-static inline u8 inb(u16 port)
+#ifdef CONFIG_64BIT
+#define __raw_readq __raw_readq
+static inline u64 __raw_readq(const volatile void __iomem *addr)
 {
-	u8 v;
-	asm volatile("inb %1,%0" : "=a" (v) : "dN" (port));
-	return v;
+	return rump_io_readq(addr);
 }
-#endif
+#endif /* CONFIG_64BIT */
 
-#ifndef inw
-#define inw inw
-static inline u16 inw(u16 port)
+#define __raw_writeb __raw_writeb
+static inline void __raw_writeb(u8 value, volatile void __iomem *addr)
 {
-	u16 v;
-	asm volatile("inw %1,%0" : "=a" (v) : "dN" (port));
-	return v;
+	rump_io_writeb(value, addr);
 }
-#endif
 
-#ifndef inl
-#define inl inl
-static inline u32 inl(u16 port)
+#define __raw_writew __raw_writew
+static inline void __raw_writew(u16 value, volatile void __iomem *addr)
 {
-	u32 v;
-	asm volatile("inl %1,%0" : "=a" (v) : "dN" (port));
-	return v;
+	rump_io_writew(value, addr);
 }
-#endif
+
+#define __raw_writel __raw_writel
+static inline void __raw_writel(u32 value, volatile void __iomem *addr)
+{
+	rump_io_writel(value, addr);
+}
+
+#ifdef CONFIG_64BIT
+#define __raw_writeq __raw_writeq
+static inline void __raw_writeq(u64 value, volatile void __iomem *addr)
+{
+	rump_io_writeq(value, addr);
+}
+#endif /* CONFIG_64BIT */
 
 
 #define ioremap ioremap

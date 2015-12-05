@@ -2,7 +2,7 @@ include arch/lkl/auto.conf
 
 KBUILD_CFLAGS += -fno-builtin
 
-ifeq ($(RUMP_PREFIX),yes)
+ifeq ($(DEBUG),yes)
 # This will make liblkl.a huge (180MB~?)
 CFLAGS_KERNEL += -g3 -DDEBUG
 endif
@@ -36,6 +36,7 @@ RUMP=no
 $(error "Couldn't found $(RUMP_PREFIX)")
 endif
 
+KBUILD_CFLAGS += -Iarch/lkl/kernel
 
 LDFLAGS_vmlinux += -r
 LKL_ENTRY_POINTS := lkl_start_kernel lkl_sys_halt lkl_syscall lkl_trigger_irq \
