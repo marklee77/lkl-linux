@@ -38,7 +38,7 @@ typedef unsigned short		umode_t;
 #endif /* umode_t */
 
 #ifndef size_t
-typedef unsigned long	size_t;
+typedef __kernel_size_t		size_t;
 #endif
 
 #ifndef __dead

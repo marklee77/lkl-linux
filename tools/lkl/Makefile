@@ -15,7 +15,8 @@ RUMP_PREFIX?=$(abspath ../..//../buildrump.sh/obj/dest.stage)
 RUMP_INCLUDE=$(RUMP_PREFIX)/usr/include
 RUMP_LIB=$(RUMP_PREFIX)/usr/lib
 
-lib_source = $(filter-out %-host.c,$(wildcard lib/*.c))
+lib_source = $(filter-out %-host.c ,$(wildcard lib/*.c))
+hijack_source = $(filter-out %-host.c,$(wildcard lib/hijack/*.c))
 source = $(wildcard tests/*.c)
 lib = lib/liblkl.a lib/liblinux.a
 ifneq (,$(filter $(OUTPUT_FORMAT),elf64-x86-64 elf32-i386 elf64-x86-64-freebsd))
@@ -29,6 +30,9 @@ lib += lib/liblkl.so
 else ifeq ($(OUTPUT_FORMAT),pe-i386)
 lib_source += lib/nt-host.c
 KOPT="KALLSYMS_EXTRA_PASS=1"
+else ifeq ($(OUTPUT_FORMAT),elf32-littlearm)
+lib_source = 
+hijack_source = 
 else
 $(error Unrecognized platform: $(OUTPUT_FORMAT))
 endif

@@ -7,7 +7,7 @@ ifeq ($(DEBUG),yes)
 CFLAGS_KERNEL += -g3 -DDEBUG
 endif
 
-ifneq (,$(filter $(OUTPUT_FORMAT),elf64-x86-64 elf64-x86-64-freebsd))
+ifneq (,$(filter $(OUTPUT_FORMAT),elf64-x86-64 elf64-x86-64-freebsd elf32-littlearm))
 KBUILD_CFLAGS += -fPIC
 else ifeq ($(OUTPUT_FORMAT),pe-i386)
 prefix=_
@@ -15,6 +15,11 @@ prefix=_
 LINUXINCLUDE := -isystem arch/lkl/include/system $(LINUXINCLUDE)
 else
 $(error Unrecognized platform: $(OUTPUT_FORMAT))
+endif
+
+ifeq ($(OUTPUT_FORMAT),elf32-littlearm)
+CFLAGS_ABI      :=-mabi=aapcs-linux -mno-thumb-interwork -mfpu=vfp
+KBUILD_CFLAGS += $(CFLAGS_ABI)
 endif
 
 ifneq (,$(filter $(OUTPUT_FORMAT),elf64-x86-64-freebsd))

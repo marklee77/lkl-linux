@@ -81,7 +81,7 @@ void virtio_dev_complete(struct virtio_dev_req *req, uint32_t len);
 #define container_of(ptr, type, member) \
 	(type *)((char *)(ptr) - __builtin_offsetof(type, member))
 
-#ifndef __MINGW32__
+#ifdef __MINGW32__
 #ifdef __FreeBSD__
 #include <sys/endian.h>
 #else
