@@ -15,12 +15,14 @@ struct timespec;
 struct stat64;
 struct statfs64;
 struct utimbuf;
+struct sigaction;
+struct rlimit;
+
+#include <linux/types.h>
 
 #ifndef umode_t
 typedef unsigned short		umode_t;
 #endif /* umode_t */
-
-#include <linux/types.h>
 
 #ifndef size_t
 typedef __kernel_size_t		size_t;
@@ -209,5 +211,7 @@ long rump___sysimpl_shutdown(int fd, int how);
 long rump_sys_shutdown(int fd, int how) __asm("rump___sysimpl_shutdown");
 long rump___sysimpl_pipe(int * fildes);
 long rump_sys_pipe(int * fildes) __asm("rump___sysimpl_pipe");
+long rump___sysimpl_getrlimit(unsigned int resource, struct rlimit * rlim);
+long rump_sys_getrlimit(unsigned int resource, struct rlimit * rlim) __asm("rump___sysimpl_getrlimit");
 long rump___sysimpl_reboot(int magic1, int magic2, unsigned int cmd, void * arg);
 long rump_sys_reboot(int magic1, int magic2, unsigned int cmd, void * arg) __asm("rump___sysimpl_reboot");

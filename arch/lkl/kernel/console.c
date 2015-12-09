@@ -44,25 +44,36 @@ static struct file_operations std_stream_dev = {
 	.write =	file_write,
 };
 
-static void lkl_std_stream_init(void)
+static int __init lkl_std_stream_init(void)
 {
 	struct file *fp;
-	int fd, err;
+	int fd;
 
-	err = sys_mkdir("/dev", 0755);
-	if (err < 0) {
+	/* stdin/stdout/stderr for lkl */
+	/* XXX: don't know why default_rootfs() doesn't work so
+	 * do it by myself.
+	 */
+	if (sys_mkdir("/dev", 0755) < 0) {
 		pr_warn("can't create /dev");
-		return;
+		return -1;
 	}
 
 	fd = sys_open("/dev/console", O_CREAT | O_RDWR | O_NDELAY, 0);
+	if (fd < 0) {
+		pr_warn("can't locate /dev/console");
+		return -1;
+	}
 	fp = fget(fd);
 	fp->f_op = &std_stream_dev;
 
+	/* XXX: init/main.c (kernel_init_freeable()) also does the same */
 	if ((sys_dup3(0, 1, 0) == -1) ||
 	    (sys_dup3(0, 2, 0) == -1))
 		panic("failed to dup fd 0/1/2");
+
+	return 0;
 }
+core_initcall(lkl_std_stream_init);
 
 static struct console lkl_console = {
 	.name	= "lkl_console",
@@ -75,7 +86,6 @@ static struct console lkl_console = {
 int __init lkl_console_init(void)
 {
 	register_console(&lkl_console);
-	lkl_std_stream_init();
 	return 0;
 }
 core_initcall(lkl_console_init);

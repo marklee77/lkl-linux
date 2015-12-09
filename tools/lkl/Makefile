@@ -56,7 +56,7 @@ endif
 install:
 	install -D lib/liblinux.a ${DESTDIR}/lib/
 	mkdir -p ${DESTDIR}/include/linux/
-	install -D ../../arch/lkl/include/generated/linux/rump_syscalls.h \
+	install -D ../../arch/lkl/include/linux/rump_syscalls.h \
 		${DESTDIR}/include/linux/
 
 all: $(lib) $(execs)
@@ -72,7 +72,7 @@ lib/liblinux.a: lib/lkl.o
 
 lib/lkl.o:
 	$(MAKE) -C ../.. ARCH=lkl defconfig
-	$(MAKE) -C ../.. ARCH=lkl $(KOPT) install INSTALL_PATH=$(PWD)
+	$(MAKE) -C ../.. ARCH=lkl $(KOPT) install INSTALL_PATH=$(PWD) O=$(O)
 
 %: %.o
 	$(CC) -o $@ $^ $(LDFLAGS)

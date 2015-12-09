@@ -51,9 +51,9 @@ core-y += arch/lkl/kernel/
 core-y += arch/lkl/drivers/
 
 # objcopy trick is taken from rumpkernel
-GCCSYMBOLS=__umoddi3|__udivdi3
+GCCSYMBOLS=__umoddi3|__udivdi3|__aeabi_idiv|__aeabi_idivmod|__aeabi_llsl|__aeabi_llsr|__aeabi_uidiv|__aeabi_uidivmod|__aeabi_uldivmod
 VMLINUX_SYMS=__start___ex_table|__stop___ex_table|boot_cmdline
-EXP_SYMRENAME=rump|RUMP|bmk_|lib_|nuse_|lkl_|__tls|__initcall_start|__initcall_end|__gcov|_end|_GLOBAL_OFFSET_TABLE|${GCCSYMBOLS}'${_SYMQUIRK}'${RUMP_SYM_NORENAME:D|${RUMP_SYM_NORENAME}}|${VMLINUX_SYMS}
+EXP_SYMRENAME=rump|RUMP|bmk_|lib_|nuse_|lkl_|__tls|__initcall_start|__initcall_end|__gcov|_end|_GLOBAL_OFFSET_TABLE|${GCCSYMBOLS}'${_SYMQUIRK}'${RUMP_SYM_NORENAME:D|${RUMP_SYM_NORENAME}}|${VMLINUX_SYMS}|__assert13
 
 define make_ns_symbols
 	${Q}echo "  OBJCPY	" $1 $2;	\
@@ -72,12 +72,20 @@ all: lkl.o
 lkl.o: arch/lkl/kernel/rump_syscalls.c vmlinux
 #	$(OBJCOPY) -R .eh_frame $(foreach sym,$(LKL_ENTRY_POINTS),-G$(prefix)$(sym)) vmlinux lkl.o
 	$(OBJCOPY) -R .eh_frame -L __start___ex_table -L __stop___ex_table vmlinux lkl.o
-	$(call make_ns_symbols,vmlinux,lkl.o)
+	$(call make_ns_symbols,vmlinux,lkl-tmp.o)
+ifeq ($(OUTPUT_FORMAT),elf32-littlearm)
+	$(Q)$(CC) -nostartfiles -Wl,-r -Wl,--build-id -o lkl.o -Wl,--whole-archive arch/lkl/kernel/lib.a \
+	 -Wl,--no-whole-archive lkl-tmp.o
+else
+	$(Q)$(LD) -r --build-id -o lkl.o --whole-archive arch/lkl/kernel/lib.a \
+	 --no-whole-archive lkl-tmp.o
+endif
+	$(Q)rm -f lkl-tmp.o
 
 install: lkl.o __headers
 	@echo "  INSTALL	$(INSTALL_PATH)/lib/lkl.o"
 	@cp lkl.o $(INSTALL_PATH)/lib/
-	@arch/lkl/scripts/headers_install.py \
+	@$(KBUILD_SRC)arch/lkl/scripts/headers_install.py \
 		$(subst -j,-j$(NPROC),$(findstring -j,$(MAKEFLAGS))) \
 		$(INSTALL_PATH)/include
 

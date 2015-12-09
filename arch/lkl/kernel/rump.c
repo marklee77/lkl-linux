@@ -47,6 +47,46 @@ rump_daemonize_done(int error)
 	return 0;
 }
 
+void rump_boot_setsigmodel(int rump_sigmodel)
+{
+}
+
+enum rump_etfs_type {
+	RUMP_ETFS_REG,
+	RUMP_ETFS_BLK,
+	RUMP_ETFS_CHR,
+	RUMP_ETFS_DIR,
+	RUMP_ETFS_DIR_SUBDIRS
+};
+
+int rump_pub_etfs_register(const char *key, const char *hostpath, enum rump_etfs_type ftype)
+{
+	return 0;
+}
+int rump_pub_etfs_register_withsize(const char *key, const char *hostpath,
+	enum rump_etfs_type ftype, uint64_t begin, uint64_t size) {return 0;}
+
+int rump___sysimpl_mount50(const char *str, const char *str2, int i, void *p, size_t s)
+{
+	return 0;
+}
+int rump___sysimpl_dup2(int i, int j)
+{
+	return 0;
+}
+int rump___sysimpl_socket30(int i, int j, int k)
+{
+	return 0;
+}
+int rump___sysimpl_unmount(const char *str, int i)
+{
+	return 0;
+}
+void
+__assert13(const char *file, int line, const char *function, const char *failedexpr)
+{
+}
+
 int
 rump_pub_lwproc_rfork(int arg1)
 {

@@ -32,6 +32,10 @@ struct timespec;
 struct stat64;
 struct statfs64;
 struct utimbuf;
+struct sigaction;
+struct rlimit;
+
+#include <linux/types.h>
 
 #ifndef umode_t
 typedef unsigned short		umode_t;
@@ -117,6 +121,15 @@ int rump_syscall(int num, void *data, size_t dlen, register_t *retval);
 
 #endif
 
+#define _C_LABEL_STRING(x)	x
+#define	__strong_alias(alias,sym)	       				\
+    __asm(".global " _C_LABEL_STRING(#alias) "\n"			\
+	    _C_LABEL_STRING(#alias) " = " _C_LABEL_STRING(#sym));
+
+#define	__weak_alias(alias,sym)						\
+    __asm(".weak " _C_LABEL_STRING(#alias) "\n"			\
+	    _C_LABEL_STRING(#alias) " = " _C_LABEL_STRING(#sym));
+
 EOF
 
 declare -A hash_
@@ -186,9 +199,9 @@ EOF
 	return ret;
 }
 #ifdef RUMP_KERNEL_IS_LIBC
-__weak_alias(${name},rump___sysimpl_${funcname});
-__weak_alias(_${name},rump___sysimpl_${funcname});
-__strong_alias(_sys_${name},rump___sysimpl_${funcname});
+__weak_alias(${funcname},rump___sysimpl_${funcname});
+__weak_alias(_${funcname},rump___sysimpl_${funcname});
+__strong_alias(_sys_${funcname},rump___sysimpl_${funcname});
 #endif /* RUMP_KERNEL_IS_LIBC */
 
 EOF
@@ -201,6 +214,7 @@ EOF
 # exception for __NR_reboot
 cat <<EOF >> ${out}
 
+/* hand-written syscalls */
 long rump___sysimpl_reboot(int magic1, int magic2, unsigned int cmd, void * arg)
 {
 	lkl_sys_halt();
@@ -209,10 +223,11 @@ long rump___sysimpl_reboot(int magic1, int magic2, unsigned int cmd, void * arg)
 	return 0;
 }
 #ifdef RUMP_KERNEL_IS_LIBC
-__weak_alias(,rump___sysimpl_reboot);
-__weak_alias(_,rump___sysimpl_reboot);
-__strong_alias(_sys_,rump___sysimpl_reboot);
+__weak_alias(reboot,rump___sysimpl_reboot);
+__weak_alias(_reboot,rump___sysimpl_reboot);
+__strong_alias(_sys_reboot,rump___sysimpl_reboot);
 #endif /* RUMP_KERNEL_IS_LIBC */
+
 EOF
 
 echo "long rump___sysimpl_reboot(int magic1, int magic2, unsigned int cmd, void * arg);" >> "${proto_h}"
@@ -228,5 +243,6 @@ __weak_alias(rump___sysimpl_pwrite,rump___sysimpl_pwrite64);
 __weak_alias(rump___sysimpl_pread,rump___sysimpl_pread64);
 __weak_alias(rump___sysimpl_utimes50,rump___sysimpl_utimes);
 __weak_alias(rump___sysimpl_nanosleep50,rump___sysimpl_nanosleep);
+
 
 EOF
