@@ -85,9 +85,9 @@ endif
 install: lkl.o __headers
 	@echo "  INSTALL	$(INSTALL_PATH)/lib/lkl.o"
 	@cp lkl.o $(INSTALL_PATH)/lib/
-	@$(KBUILD_SRC)arch/lkl/scripts/headers_install.py \
+	@$(srctree)/arch/lkl/scripts/headers_install.py \
 		$(subst -j,-j$(NPROC),$(findstring -j,$(MAKEFLAGS))) \
-		$(INSTALL_PATH)/include
+		-s $(srctree)/ $(INSTALL_PATH)/include
 
 archclean:
 	$(Q)$(MAKE) $(clean)=$(boot)

@@ -93,11 +93,13 @@ def replace(h):
 
 parser = argparse.ArgumentParser(description='install lkl headers')
 parser.add_argument('path', help='path to install to', )
+parser.add_argument('-s', '--srctree', help='path to $(srctree) env of Makefile',
+                    default='./', type=str)
 parser.add_argument('-j', '--jobs', help='number of parallel jobs', default=1, type=int)
 args = parser.parse_args()
 
-find_headers("arch/lkl/include/uapi/asm/syscalls.h")
-headers.add("arch/lkl/include/uapi/asm/host_ops.h")
+find_headers(args.srctree + "arch/lkl/include/uapi/asm/unistd.h")
+headers.add(args.srctree + "arch/lkl/include/uapi/asm/host_ops.h")
 
 defines = set()
 structs = set()
@@ -148,11 +150,9 @@ def process_header(h):
         os.makedirs(out_dir)
     except:
         pass
-    print("  INSTALL\t%s" % (out_dir + "/" + os.path.basename(h)))
-    os.system("scripts/headers_install.sh %s %s %s" % (out_dir, dir,
-                                                       os.path.basename(h)))
-    if h == "arch/lkl/include/uapi/asm/syscalls.h":
-        generate_syscalls(out_dir + "/" + os.path.basename(h))
+    print "  INSTALL\t%s" % (out_dir + "/" + os.path.basename(h))
+    os.system(args.srctree + "scripts/headers_install.sh %s %s %s" %
+              (out_dir, dir, os.path.basename(h)))
     replace(out_dir + "/" + os.path.basename(h))
 
 p = multiprocessing.Pool(args.jobs)
