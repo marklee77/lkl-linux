@@ -188,7 +188,7 @@ __strong_alias(_sys_creat,rump___sysimpl_creat);
 #endif /* RUMP_KERNEL_IS_LIBC */
 
 
-long rump___sysimpl_poll(void * ufds, unsigned int nfds, int timeout)
+long rump___sysimpl_poll(struct pollfd * ufds, unsigned int nfds, int timeout)
 {
 	int ret;
 	long params[6];
