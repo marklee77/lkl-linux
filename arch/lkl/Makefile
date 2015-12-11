@@ -61,7 +61,7 @@ define make_ns_symbols
 	$$NF!~/^'${_PQ}'(${EXP_SYMRENAME})/ \
 	{s=$$NF;sub(/^'${_PQ}'/, "&rumpns_", s); print $$NF, s}'\
 	| sort | uniq  > $2.renametab; \
-	$(OBJCOPY) -L __start___ex_table -L __stop___ex_table --preserve-dates \
+	$(OBJCOPY) -R .eh_frame -L __start___ex_table -L __stop___ex_table --preserve-dates \
 	 --redefine-syms $2.renametab $1 $2; \
 	rm -f $2.renametab
 endef
@@ -71,16 +71,7 @@ all: lkl.o
 
 lkl.o: arch/lkl/kernel/rump_syscalls.c vmlinux
 #	$(OBJCOPY) -R .eh_frame $(foreach sym,$(LKL_ENTRY_POINTS),-G$(prefix)$(sym)) vmlinux lkl.o
-	$(OBJCOPY) -R .eh_frame -L __start___ex_table -L __stop___ex_table vmlinux lkl.o
-	$(call make_ns_symbols,vmlinux,lkl-tmp.o)
-ifeq ($(OUTPUT_FORMAT),elf32-littlearm)
-	$(Q)$(CC) -nostartfiles -Wl,-r -Wl,--build-id -o lkl.o -Wl,--whole-archive arch/lkl/kernel/lib.a \
-	 -Wl,--no-whole-archive lkl-tmp.o
-else
-	$(Q)$(LD) -r --build-id -o lkl.o --whole-archive arch/lkl/kernel/lib.a \
-	 --no-whole-archive lkl-tmp.o
-endif
-	$(Q)rm -f lkl-tmp.o
+	$(call make_ns_symbols,vmlinux,lkl.o)
 
 install: lkl.o __headers
 	@echo "  INSTALL	$(INSTALL_PATH)/lib/lkl.o"

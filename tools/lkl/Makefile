@@ -16,7 +16,6 @@ RUMP_INCLUDE=$(RUMP_PREFIX)/usr/include
 RUMP_LIB=$(RUMP_PREFIX)/usr/lib
 
 lib_source = $(filter-out %-host.c ,$(wildcard lib/*.c))
-hijack_source = $(filter-out %-host.c,$(wildcard lib/hijack/*.c))
 source = $(wildcard tests/*.c)
 lib = lib/liblkl.a lib/liblinux.a
 ifneq (,$(filter $(OUTPUT_FORMAT),elf64-x86-64 elf32-i386 elf64-x86-64-freebsd))
@@ -32,7 +31,6 @@ lib_source += lib/nt-host.c
 KOPT="KALLSYMS_EXTRA_PASS=1"
 else ifeq ($(OUTPUT_FORMAT),elf32-littlearm)
 lib_source = 
-hijack_source = 
 else
 $(error Unrecognized platform: $(OUTPUT_FORMAT))
 endif
@@ -45,7 +43,6 @@ lib_objs = $(patsubst %.c,%.o, $(lib_source))
 objs = $(patsubst %.c,%.o, $(source))
 execs += $(patsubst %.c,%, $(source))
 
-all: $(lib) $(execs)
 # if there is no librumpuser.a, then skip execs build
 ifeq (,$(wildcard $(RUMP_LIB)/librumpuser*))
 execs =
@@ -53,13 +50,13 @@ else
 LDFLAGS += -L$(RUMP_LIB) -Wl,-rpath,$(RUMP_LIB) -lrumpuser
 endif
 
+all: $(lib) $(execs)
+
 install:
 	install -D lib/liblinux.a ${DESTDIR}/lib/
 	mkdir -p ${DESTDIR}/include/linux/
 	install -D ../../arch/lkl/include/linux/rump_syscalls.h \
 		${DESTDIR}/include/linux/
-
-all: $(lib) $(execs)
 
 lib/liblkl.a: $(lib_objs) lib/lkl.o
 	$(AR) -rc $@ $^

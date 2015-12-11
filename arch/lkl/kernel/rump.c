@@ -9,6 +9,7 @@
 #include <asm/types.h>
 #include <asm/unistd.h>
 #include <asm/host_ops.h>
+#include <asm/syscalls.h>
 
 #include "rump.h"
 
@@ -86,6 +87,19 @@ void
 __assert13(const char *file, int line, const char *function, const char *failedexpr)
 {
 }
+int rump___sysimpl_close(int fd) {return -1;}
+int
+rump___sysimpl_ioctl(int fd, u_long com, void * data)
+{
+return -1;
+}
+
+int
+rump___sysimpl_mkdir(const char * path, mode_t mode)
+{
+return -1;
+}
+int rump___sysimpl_open(const char *name, int flags, ...) {return -1;}
 
 int
 rump_pub_lwproc_rfork(int arg1)

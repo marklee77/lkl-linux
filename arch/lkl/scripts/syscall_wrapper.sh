@@ -5,7 +5,7 @@ out="$2"
 proto_h="$3"
 
 # should be picked from $(srctree)/Makefile
-USERINCLUDE="-Iinclude -Iinclude/generated/ -Iarch/lkl/include/generated -Iarch/lkl/include/generated/uapi -Iarch/lkl/include"
+USERINCLUDE="-Iinclude -Iinclude/generated/ -Iarch/lkl/include/generated -Iarch/lkl/include/generated/uapi -Iarch/lkl/include -Itools/lkl/include"
 
 # obtain supported system calls from ${in} (lkl/include/uapi/asm/unistd.h)
 SYSCALL_NR_LIST=$(grep "#define __NR" ${in} | awk '{print $2}')
@@ -34,16 +34,15 @@ struct statfs64;
 struct utimbuf;
 struct sigaction;
 struct rlimit;
+struct stat;
+struct itimerspec;
+struct linux_dirent64;
 
 #include <linux/types.h>
 
 #ifndef umode_t
 typedef unsigned short		umode_t;
 #endif /* umode_t */
-
-#ifndef size_t
-typedef __kernel_size_t		size_t;
-#endif
 
 #ifndef __dead
 #define __dead __attribute__((__noreturn__))
@@ -88,6 +87,7 @@ cat <<EOF > ${out}
 #include <rump/rumpuser_port.h>
 #endif /* RUMP_CLIENT */
 
+#include <linux/syscalls.h>
 #include <asm/unistd.h>
 #include <linux/rump_syscalls.h>
 
@@ -122,12 +122,12 @@ int rump_syscall(int num, void *data, size_t dlen, register_t *retval);
 #endif
 
 #define _C_LABEL_STRING(x)	x
-#define	__strong_alias(alias,sym)	       				\
-    __asm(".global " _C_LABEL_STRING(#alias) "\n"			\
+#define	__strong_alias(alias,sym)	       				\\
+    __asm(".global " _C_LABEL_STRING(#alias) "\n"			\\
 	    _C_LABEL_STRING(#alias) " = " _C_LABEL_STRING(#sym));
 
-#define	__weak_alias(alias,sym)						\
-    __asm(".weak " _C_LABEL_STRING(#alias) "\n"			\
+#define	__weak_alias(alias,sym)						\\
+    __asm(".weak " _C_LABEL_STRING(#alias) "\n"			\\
 	    _C_LABEL_STRING(#alias) " = " _C_LABEL_STRING(#sym));
 
 EOF
@@ -143,9 +143,9 @@ grep '#define __NR_' "$in"  | (
 )
 
 set -f
-cpp -P ${USERINCLUDE} "$in" 2> /dev/null | \
-    grep -E "^static inline long lkl_sys" | sed "s/{.*//" | (
-    while read mod inline ret func; do
+cpp -P -DLIBRUMPUSER -D_KERNEL_ ${USERINCLUDE} "$in" 2> /dev/null | \
+    grep -E "^ long sys_" | sed "s/{.*//" | (
+    while read mod ret func; do
 	#echo $func
 	# 1) count the number of argument
 	func_l=/$func/
@@ -213,7 +213,7 @@ EOF
 
 # exception for __NR_reboot
 cat <<EOF >> ${out}
-
+#if 0
 /* hand-written syscalls */
 long rump___sysimpl_reboot(int magic1, int magic2, unsigned int cmd, void * arg)
 {
@@ -227,7 +227,7 @@ __weak_alias(reboot,rump___sysimpl_reboot);
 __weak_alias(_reboot,rump___sysimpl_reboot);
 __strong_alias(_sys_reboot,rump___sysimpl_reboot);
 #endif /* RUMP_KERNEL_IS_LIBC */
-
+#endif
 EOF
 
 echo "long rump___sysimpl_reboot(int magic1, int magic2, unsigned int cmd, void * arg);" >> "${proto_h}"

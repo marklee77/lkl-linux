@@ -99,6 +99,7 @@ parser.add_argument('-j', '--jobs', help='number of parallel jobs', default=1, t
 args = parser.parse_args()
 
 find_headers(args.srctree + "arch/lkl/include/uapi/asm/unistd.h")
+find_headers(args.srctree + "arch/lkl/include/uapi/asm/syscalls.h")
 headers.add(args.srctree + "arch/lkl/include/uapi/asm/host_ops.h")
 
 defines = set()
@@ -153,6 +154,8 @@ def process_header(h):
     print "  INSTALL\t%s" % (out_dir + "/" + os.path.basename(h))
     os.system(args.srctree + "scripts/headers_install.sh %s %s %s" %
               (out_dir, dir, os.path.basename(h)))
+    if h == args.srctree + "arch/lkl/include/uapi/asm/syscalls.h":
+        generate_syscalls(out_dir + "/" + os.path.basename(h))
     replace(out_dir + "/" + os.path.basename(h))
 
 p = multiprocessing.Pool(args.jobs)
