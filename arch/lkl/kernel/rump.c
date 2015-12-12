@@ -330,9 +330,10 @@ static void *rump_timer_trampoline(void *arg)
 			goto end;
 	}
 
+	rumpuser_free(td, 0);
 	f(thrarg);
 
-	rumpuser_free(td, 0);
+	rumpuser_thread_exit();
 end:
 	return arg;
 }
