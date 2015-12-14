@@ -4,7 +4,9 @@
 #include <linux/file.h>
 #include <linux/fs.h>
 #include <linux/syscalls.h>
-#include <linux/kdev_t.h>
+#include <linux/device.h>
+#include <linux/cdev.h>
+#include <linux/major.h>
 
 #include "rump.h"
 
@@ -40,40 +42,43 @@ early_initcall(lkl_boot_console_init);
 #endif
 
 /* only support stdout */
-static struct file_operations std_stream_dev = {
+static struct file_operations lkl_stdio_fops = {
+	.owner		= THIS_MODULE,
 	.write =	file_write,
 };
 
-static int __init lkl_std_stream_init(void)
+static int __init lkl_stdio_init(void)
 {
-	struct file *fp;
-	int fd;
+	int err;
 
-	/* stdin/stdout/stderr for lkl */
-	/* XXX: don't know why default_rootfs() doesn't work so
-	 * do it by myself.
-	 */
-	if (sys_mkdir("/dev", 0755) < 0) {
-		pr_warn("can't create /dev");
-		return -1;
+	/* prepare /dev/console */
+	err = register_chrdev(TTYAUX_MAJOR, "console", &lkl_stdio_fops);
+	if (err < 0) {
+		printk(KERN_ERR "can't register lkl stdio console.\n");
+		return err;
 	}
-
-	fd = sys_open("/dev/console", O_CREAT | O_RDWR | O_NDELAY, 0);
-	if (fd < 0) {
-		pr_warn("can't locate /dev/console");
-		return -1;
-	}
-	fp = fget(fd);
-	fp->f_op = &std_stream_dev;
-
-	/* XXX: init/main.c (kernel_init_freeable()) also does the same */
-	if ((sys_dup3(0, 1, 0) == -1) ||
-	    (sys_dup3(0, 2, 0) == -1))
-		panic("failed to dup fd 0/1/2");
 
 	return 0;
 }
-core_initcall(lkl_std_stream_init);
+/* should be _before_ default_rootfs creation (noinitramfs.c) */
+fs_initcall(lkl_stdio_init);
+
+static int __init lkl_memdev_init(void)
+{
+	int err;
+
+	/* prepare /dev/null */
+	err = sys_mknod((const char __user __force *) "/dev/null",
+			S_IFCHR | S_IRUSR | S_IWUSR,
+			new_encode_dev(MKDEV(MEM_MAJOR, 3)));
+	if (err < 0) {
+		printk(KERN_ERR "can't register /dev/null.\n");
+		return err;
+	}
+
+	return 0;
+}
+device_initcall(lkl_memdev_init);
 
 static struct console lkl_console = {
 	.name	= "lkl_console",
