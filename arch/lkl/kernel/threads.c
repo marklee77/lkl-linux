@@ -78,7 +78,7 @@ struct task_struct *__switch_to(struct task_struct *prev,
 	/*
 	 * schedule() expects the return of this function to be the task that we
 	 * switched away from. Returning prev is not going to work because we
-	 * are actually going to return the previous taks that was scheduled
+	 * are actually going to return the previous task that was scheduled
 	 * before the task we are going to wake up, and not the current task,
 	 * e.g.:
 	 *
@@ -91,7 +91,7 @@ struct task_struct *__switch_to(struct task_struct *prev,
 	 * We need to free the thread_info structure in free_thread_info to
 	 * avoid races between the dying thread and other threads. We also need
 	 * to cleanup sched_sem and signal to the prev thread that it needs to
-	 * exit, and we use this stack varible to pass this info.
+	 * exit, and we use this stack variable to pass this info.
 	 */
 	struct thread_exit_info ei = {
 		.dead = false,
@@ -197,7 +197,7 @@ int threads_init(void)
 
 	threads_counter_lock = lkl_ops->sem_alloc(1);
 	if (!threads_counter_lock) {
-		pr_early("lkl: failed to alllocate threads counter lock\n");
+		pr_early("lkl: failed to allocate threads counter lock\n");
 		ret = -ENOMEM;
 		goto out_free_init_sched_sem;
 	}

@@ -7,9 +7,10 @@
  * These operations must be provided by a host library or by the application
  * itself.
  *
- * @virtio_devices - string containg the list of virtio devices in virtio mmio
- * command line format. This string is appended to the kernel command line and
- * is provided here for convenience to be implemented by the host library.
+ * @virtio_devices - string containing the list of virtio devices in virtio
+ * mmio command line format. This string is appended to the kernel command
+ * line and is provided here for convenience to be implemented by the host
+ * library.
  *
  * @print - optional operation that receives console messages
  *
@@ -20,8 +21,8 @@
  * @sem_up - perform an up operation on the semaphore
  * @sem_down - perform a down operation on the semaphore
  *
- * @thread_create - create a new thread and run f(arg) in its context; returns a
- * thread handle or NULL if the thread could not be created
+ * @thread_create - create a new thread and run f(arg) in its context; returns
+ * a thread handle or NULL if the thread could not be created
  * @thread_exit - terminates the current thread
  *
  * @mem_alloc - allocate memory
