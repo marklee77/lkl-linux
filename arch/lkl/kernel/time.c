@@ -36,13 +36,19 @@ void calibrate_delay(void)
 {
 }
 
+void read_persistent_clock(struct timespec *ts)
+{
+	rumpuser_clock_gettime(RUMPUSER_CLOCK_RELWALL, (int64_t *)&ts->tv_sec,
+			       &ts->tv_nsec);
+}
+
 static cycle_t clock_read(struct clocksource *cs)
 {
 #ifdef LKL_TIMER
 	return lkl_ops->time();
 #else
 	struct timespec ts;
-	rumpuser_clock_gettime(RUMPUSER_CLOCK_ABSMONO, (int64_t *)&ts.tv_sec,
+	rumpuser_clock_gettime(RUMPUSER_CLOCK_RELWALL, (int64_t *)&ts.tv_sec,
 			       &ts.tv_nsec);
 
 	return timespec_to_ns(&ts);
