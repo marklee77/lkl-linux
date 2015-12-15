@@ -29,15 +29,12 @@ NPROC=$(shell nproc)
 endif
 
 # rump libraries
-RUMP_PREFIX?=$(abspath $(srctree)/../buildrump.sh/obj/dest.stage)
-RUMP_INCLUDE=$(RUMP_PREFIX)/usr/include
-RUMP_LIB=$(RUMP_PREFIX)/usr/lib
-RUMP?=yes
+RUMP_PREFIX?=$(abspath $(srctree)/../librumpuser)
+RUMP_INCLUDE?=$(RUMP_PREFIX)/
 ifneq ($(wildcard $(RUMP_PREFIX)/.),)
 KBUILD_CFLAGS += -I$(RUMP_INCLUDE) -DRUMPUSER -DLIBRUMPUSER -D_KERNEL
 KBUILD_CFLAGS += -isystem $(RUMP_INCLUDE)
 else
-RUMP=no
 $(error "Couldn't found $(RUMP_PREFIX)")
 endif
 

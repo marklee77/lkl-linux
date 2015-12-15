@@ -11,8 +11,7 @@ CC=gcc
 endif
 
 OUTPUT_FORMAT=$(shell $(LD) -r -print-output-format)
-RUMP_PREFIX?=$(abspath ../..//../buildrump.sh/obj/dest.stage)
-RUMP_INCLUDE=$(RUMP_PREFIX)/usr/include
+RUMP_PREFIX?=$(abspath ../../../rumpobj/dest.stage)
 RUMP_LIB=$(RUMP_PREFIX)/usr/lib
 
 lib_source = $(filter-out %-host.c ,$(wildcard lib/*.c))
