@@ -60,6 +60,7 @@ int __init lkl_start_kernel(struct lkl_host_operations *ops,
 	va_list ap;
 	int ret;
 	void *thr;
+	char *virtio_devices;
 
 	mem_size = _mem_size;
 
@@ -67,8 +68,9 @@ int __init lkl_start_kernel(struct lkl_host_operations *ops,
 	ret = vsnprintf(boot_command_line, COMMAND_LINE_SIZE, fmt, ap);
 	va_end(ap);
 
-	if (ops && ops->virtio_devices)
-		strncpy(boot_command_line + ret, ops->virtio_devices,
+	virtio_devices = rumpuser_virtio_devices();
+	if (virtio_devices)
+		strncpy(boot_command_line + ret, virtio_devices,
 			COMMAND_LINE_SIZE - ret);
 
 	memcpy(cmd_line, boot_command_line, COMMAND_LINE_SIZE);

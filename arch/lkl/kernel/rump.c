@@ -398,6 +398,102 @@ rump_thread_allow(struct lwp *l)
 	rumpuser_mutex_exit(thrmtx);
 }
 
+#define __LKL__MAP0(m,...)
+#define __LKL__MAP1(m,t,a) m(t,a)
+#define __LKL__MAP2(m,t,a,...) m(t,a), __LKL__MAP1(m,__VA_ARGS__)
+#define __LKL__MAP3(m,t,a,...) m(t,a), __LKL__MAP2(m,__VA_ARGS__)
+#define __LKL__MAP4(m,t,a,...) m(t,a), __LKL__MAP3(m,__VA_ARGS__)
+#define __LKL__MAP5(m,t,a,...) m(t,a), __LKL__MAP4(m,__VA_ARGS__)
+#define __LKL__MAP6(m,t,a,...) m(t,a), __LKL__MAP5(m,__VA_ARGS__)
+#define __LKL__MAP(n,...) __LKL__MAP##n(__VA_ARGS__)
+
+#define __LKL__SC_LONG(t, a) (long)a
+#define __LKL__SC_DECL(t, a) t a
+
+#define LKL_SYSCALL0(name)					       \
+	static __inline__ long lkl_sys_##name(void)			       \
+	{							       \
+		long params[6];					       \
+		return lkl_syscall(__lkl__NR_##name, params);	       \
+	}
+
+#define LKL_SYSCALLx(x, name, ...)				       \
+       	static __inline__						       \
+	long lkl_sys_##name(__LKL__MAP(x, __LKL__SC_DECL, __VA_ARGS__))	       \
+	{							       \
+		long params[6] = { __LKL__MAP(x, __LKL__SC_LONG, __VA_ARGS__) }; \
+		return lkl_syscall(__lkl__NR_##name, params);	       \
+	}
+
+#define LKL_SYSCALL_DEFINE0(name, ...) LKL_SYSCALL0(name)
+#define LKL_SYSCALL_DEFINE1(name, ...) LKL_SYSCALLx(1, name, __VA_ARGS__)
+#define LKL_SYSCALL_DEFINE2(name, ...) LKL_SYSCALLx(2, name, __VA_ARGS__)
+#define LKL_SYSCALL_DEFINE3(name, ...) LKL_SYSCALLx(3, name, __VA_ARGS__)
+#define LKL_SYSCALL_DEFINE4(name, ...) LKL_SYSCALLx(4, name, __VA_ARGS__)
+#define LKL_SYSCALL_DEFINE5(name, ...) LKL_SYSCALLx(5, name, __VA_ARGS__)
+#define LKL_SYSCALL_DEFINE6(name, ...) LKL_SYSCALLx(6, name, __VA_ARGS__)
+
+struct lkl_linux_dirent64 {
+	u64		d_ino;
+	s64		d_off;
+	unsigned short	d_reclen;
+	unsigned char	d_type;
+	char		d_name[0];
+};
+
+#define __lkl__user
+#define __lkl__NR_open 1024
+#ifdef __lkl__NR_open
+LKL_SYSCALL_DEFINE3(open, const char __lkl__user *, filename, int, flags, umode_t, mode)
+#endif
+#define __lkl__NR_getdents64 61
+#ifdef __lkl__NR_getdents64
+LKL_SYSCALL_DEFINE3(getdents64, unsigned int, fd,
+		struct lkl_linux_dirent64 __lkl__user *, dirent, unsigned int, count)
+#endif
+#define __lkl__NR_chdir 49
+#ifdef __lkl__NR_chdir
+LKL_SYSCALL_DEFINE1(chdir, const char __lkl__user *, filename)
+#endif
+
+long lkl_mount_dev(unsigned int disk_id, const char *fs_type, int flags,
+		   void *data, char *mnt_str, unsigned int mnt_str_len);
+
+struct lkl_host_operations __weak lkl_host_ops;
+/* TMP */
+int lkl_disk_add(void);
+int disk_id;
+
+#define O_RDONLY	00000000
+#define O_DIRECTORY	00200000	/* must be a directory */
+
+static void test_virtio_dev(void)
+{
+	int ret, dir_fd;
+	char mnt_point[32] = "/mnt";
+	struct lkl_linux_dirent64 *de;
+	char buf[1024], *pos;
+
+	ret = lkl_mount_dev(disk_id, "ext4", 0, NULL, mnt_point,
+			    sizeof(mnt_point));
+
+	ret = lkl_sys_chdir(mnt_point);
+
+	dir_fd = lkl_sys_open(".", O_RDONLY | O_DIRECTORY, 0);
+
+	de = (struct lkl_linux_dirent64 *)buf;
+	ret = lkl_sys_getdents64(dir_fd, de, sizeof(buf));
+	char strbuf[512], *str = &strbuf[0];
+	int wr;
+	for (pos = buf; pos - buf < ret; pos += de->d_reclen) {
+		de = (struct lkl_linux_dirent64 *)pos;
+
+		wr = snprintf(str, 512, "%s ", de->d_name);
+		str += wr;
+	}
+	pr_info("getdents64 %s\n", strbuf);
+
+}
 
 #define LKL_MEM_SIZE 100 * 1024 * 1024
 char *boot_cmdline = "";	/* FIXME: maybe we have rump_set_boot_cmdline? */
@@ -412,6 +508,7 @@ int rump_init(void)
 	rumpuser_cv_init(&thrcv);
 	threads_are_go = false;
 
+disk_id = lkl_disk_add();
 	lkl_start_kernel(NULL, LKL_MEM_SIZE, boot_cmdline);
 
 	rump_thread_allow(NULL);
@@ -420,6 +517,7 @@ int rump_init(void)
 #ifdef ENABLE_SYSPROXY
 	rump_sysproxy_init();
 #endif
+test_virtio_dev();
 	pr_info("rumpuser started.\n");
 	return 0;
 }
