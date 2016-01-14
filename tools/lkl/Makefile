@@ -11,7 +11,7 @@ CC=gcc
 endif
 
 OUTPUT_FORMAT=$(shell $(LD) -r -print-output-format)
-RUMP_PREFIX?=$(abspath ../../../rumpobj/dest.stage)
+RUMP_PREFIX?=$(abspath ../../../frankenlibc/rumpobj/dest.stage)
 RUMP_LIB=$(RUMP_PREFIX)/usr/lib
 
 lib_source = $(filter-out %-host.c ,$(wildcard lib/*.c))
@@ -23,7 +23,7 @@ lib_source += lib/posix-host.c
 CFLAGS += -fPIC
 LDFLAGS += -lpthread -lrt -ldl
 source += $(wildcard *.c)
-execs =  cpfromfs
+execs = cpfromfs
 lib += lib/liblkl.so
 else ifeq ($(OUTPUT_FORMAT),pe-i386)
 lib_source += lib/nt-host.c

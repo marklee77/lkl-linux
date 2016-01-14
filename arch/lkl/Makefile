@@ -29,7 +29,7 @@ NPROC=$(shell nproc)
 endif
 
 # rump libraries
-RUMP_PREFIX?=$(abspath $(srctree)/../librumpuser)
+RUMP_PREFIX?=$(abspath $(srctree)/../frankenlibc/librumpuser)
 RUMP_INCLUDE?=$(RUMP_PREFIX)/
 ifneq ($(wildcard $(RUMP_PREFIX)/.),)
 KBUILD_CFLAGS += -I$(RUMP_INCLUDE) -DRUMPUSER -DLIBRUMPUSER -D_KERNEL
