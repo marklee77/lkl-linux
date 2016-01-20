@@ -456,44 +456,10 @@ LKL_SYSCALL_DEFINE3(getdents64, unsigned int, fd,
 LKL_SYSCALL_DEFINE1(chdir, const char __lkl__user *, filename)
 #endif
 
-long lkl_mount_dev(unsigned int disk_id, const char *fs_type, int flags,
-		   void *data, char *mnt_str, unsigned int mnt_str_len);
-
 struct lkl_host_operations __weak lkl_host_ops;
-/* TMP */
-int lkl_disk_add(void);
-int disk_id;
 
 #define O_RDONLY	00000000
 #define O_DIRECTORY	00200000	/* must be a directory */
-
-static void test_virtio_dev(void)
-{
-	int ret, dir_fd;
-	char mnt_point[32] = "/mnt";
-	struct lkl_linux_dirent64 *de;
-	char buf[1024], *pos;
-
-	ret = lkl_mount_dev(disk_id, "ext4", 0, NULL, mnt_point,
-			    sizeof(mnt_point));
-
-	ret = lkl_sys_chdir(mnt_point);
-
-	dir_fd = lkl_sys_open(".", O_RDONLY | O_DIRECTORY, 0);
-
-	de = (struct lkl_linux_dirent64 *)buf;
-	ret = lkl_sys_getdents64(dir_fd, de, sizeof(buf));
-	char strbuf[512], *str = &strbuf[0];
-	int wr;
-	for (pos = buf; pos - buf < ret; pos += de->d_reclen) {
-		de = (struct lkl_linux_dirent64 *)pos;
-
-		wr = snprintf(str, 512, "%s ", de->d_name);
-		str += wr;
-	}
-	pr_info("getdents64 %s\n", strbuf);
-
-}
 
 #define LKL_MEM_SIZE 100 * 1024 * 1024
 char *boot_cmdline = "";	/* FIXME: maybe we have rump_set_boot_cmdline? */
@@ -508,16 +474,10 @@ int rump_init(void)
 	rumpuser_cv_init(&thrcv);
 	threads_are_go = false;
 
-disk_id = lkl_disk_add();
 	lkl_start_kernel(NULL, LKL_MEM_SIZE, boot_cmdline);
 
 	rump_thread_allow(NULL);
-	/* FIXME: rumprun doesn't have sysproxy.
-	 * maybe outsourced and linked -lsysproxy for hijack case ? */
-#ifdef ENABLE_SYSPROXY
-	rump_sysproxy_init();
-#endif
-test_virtio_dev();
+
 	pr_info("rumpuser started.\n");
 	return 0;
 }
