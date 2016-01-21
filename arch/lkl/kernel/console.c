@@ -12,10 +12,8 @@
 
 static void console_write(struct console *con, const char *str, unsigned len)
 {
-	while (len-- > 0) {
-		rumpuser_putchar(*str);
-		str++;
-	}
+	if (lkl_ops->print)
+		lkl_ops->print(str, len);
 }
 
 #ifdef CONFIG_LKL_EARLY_CONSOLE

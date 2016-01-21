@@ -6,7 +6,6 @@
 #include <linux/slab.h>
 #include <linux/types.h>
 #include <linux/net.h>
-#include <linux/printk.h>
 #include <linux/task_work.h>
 #include <linux/syscalls.h>
 #include <asm/host_ops.h>
@@ -126,7 +125,6 @@ long lkl_syscall(long no, long *params)
 	rump_sem_down(s.sem);
 	rump_sem_free(s.sem);
 
-    printk("lkl_syscall: %d\n", no);
 	return s.ret;
 }
 
