@@ -20,6 +20,8 @@ static bool halt;
 void (*pm_power_off)(void) = NULL;
 static unsigned long mem_size;
 
+extern char lkl_virtio_devs[];
+
 long lkl_panic_blink(int state)
 {
 	rumpuser_exit(RUMPUSER_PANIC);
@@ -68,7 +70,7 @@ int __init lkl_start_kernel(struct lkl_host_operations *ops,
 	ret = vsnprintf(boot_command_line, COMMAND_LINE_SIZE, fmt, ap);
 	va_end(ap);
 
-	virtio_devices = rumpuser_virtio_devices();
+	virtio_devices = lkl_virtio_devs;
 	if (virtio_devices)
 		strncpy(boot_command_line + ret, virtio_devices,
 			COMMAND_LINE_SIZE - ret);

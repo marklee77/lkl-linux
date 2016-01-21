@@ -63,7 +63,7 @@ lib/liblkl.a: $(lib_objs) lib/lkl.o
 lib/liblkl.so: $(lib_objs) lib/lkl.o
 	gcc -o $@ -shared $^
 
-lib/liblinux.a: lib/lkl.o lib/fs.o
+lib/liblinux.a: lib/lkl.o lib/fs.o lib/iomem.o lib/utils.o
 	$(AR) -rc $@ $^
 
 lib/lkl.o:

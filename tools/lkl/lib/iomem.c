@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <lkl_host.h>
 
 #include "iomem.h"
@@ -51,7 +52,7 @@ int register_iomem(void *base, int size, const struct lkl_iomem_ops *ops)
 	if (i >= MAX_IOMEM_REGIONS)
 		return -1;
 
-	iomem_reg = lkl_host_ops.mem_alloc(sizeof(*iomem_reg));
+	iomem_reg = malloc(sizeof(*iomem_reg));
 	if (!iomem_reg)
 		return -1;
 
@@ -83,8 +84,8 @@ void unregister_iomem(void *iomem_base)
 	}
 
 	iomem_regions[index] = NULL;
-	lkl_host_ops.mem_free(iomem_reg->base);
-	lkl_host_ops.mem_free(iomem_reg);
+	free(iomem_reg->base);
+	free(iomem_reg);
 }
 
 void *lkl_ioremap(long addr, int size)
