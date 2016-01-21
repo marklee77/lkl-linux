@@ -158,6 +158,8 @@ struct lkl_host_operations lkl_host_ops = {
 	.virtio_devices = lkl_virtio_devs,
 };
 
+#if 0
+
 int fd_get_capacity(union lkl_disk_backstore bs, unsigned long long *res)
 {
 	off_t off;
@@ -210,3 +212,5 @@ struct lkl_dev_blk_ops lkl_dev_blk_ops = {
 	.get_capacity = fd_get_capacity,
 	.request = fd_do_rw,
 };
+
+#endif

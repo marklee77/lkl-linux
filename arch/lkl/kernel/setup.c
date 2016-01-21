@@ -64,6 +64,7 @@ int __init lkl_start_kernel(struct lkl_host_operations *ops,
 	void *thr;
 	char *virtio_devices;
 
+    lkl_ops = ops;
 	mem_size = _mem_size;
 
 	va_start(ap, fmt);

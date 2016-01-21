@@ -461,8 +461,10 @@ struct lkl_host_operations __weak lkl_host_ops;
 #define O_RDONLY	00000000
 #define O_DIRECTORY	00200000	/* must be a directory */
 
+extern struct lkl_host_operations lkl_host_ops;
 #define LKL_MEM_SIZE 100 * 1024 * 1024
 char *boot_cmdline = "";	/* FIXME: maybe we have rump_set_boot_cmdline? */
+
 int rump_init(void)
 {
 	if (rumpuser_init(RUMPUSER_VERSION, &hyp) != 0) {
@@ -474,7 +476,7 @@ int rump_init(void)
 	rumpuser_cv_init(&thrcv);
 	threads_are_go = false;
 
-	lkl_start_kernel(NULL, LKL_MEM_SIZE, boot_cmdline);
+	lkl_start_kernel(&lkl_host_ops, LKL_MEM_SIZE, boot_cmdline);
 
 	rump_thread_allow(NULL);
 
