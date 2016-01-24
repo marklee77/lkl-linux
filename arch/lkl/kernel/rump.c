@@ -104,6 +104,7 @@ int rump___sysimpl_open(const char *name, int flags, ...) {return -1;}
 int
 rump_pub_lwproc_rfork(int arg1)
 {
+#if 0
 	int rv = 0;
 
 	rump_schedule();
@@ -111,6 +112,9 @@ rump_pub_lwproc_rfork(int arg1)
 	rump_unschedule();
 
 	return rv;
+#else
+    return 0;
+#endif
 }
 
 int
@@ -194,24 +198,29 @@ rump_libos_lwproc_rfork(void *priv, int flags, const char *comm)
 static void
 rump_libos_lwproc_release(void)
 {
+#if 0
 	struct thread_info *ti = (struct thread_info *)rumpuser_curlwp();
 
 	rumpuser_curlwpop(RUMPUSER_LWP_CLEAR, (struct lwp *)ti);
+#endif
 }
 
 static void
 rump_libos_lwproc_switch(struct lwp *newlwp)
 {
+#if 0
 	struct thread_info *ti = (struct thread_info *)rumpuser_curlwp();
 
 	rumpuser_curlwpop(RUMPUSER_LWP_CLEAR, (struct lwp *)ti);
 	rumpuser_curlwpop(RUMPUSER_LWP_SET, (struct lwp *)ti);
+#endif
 }
 
 /* find rump_task created by rfork */
 static int
 rump_libos_lwproc_newlwp(pid_t pid)
 {
+#if 0
 	/* find rump_task */
 	struct thread_info *ti = NULL;
 	struct task_struct *p;
@@ -233,30 +242,41 @@ rump_libos_lwproc_newlwp(pid_t pid)
 	/* set to currnet */
 	rumpuser_curlwpop(RUMPUSER_LWP_SET, (struct lwp *)ti);
 
+#endif
 	return 0;
 }
 
 static struct lwp *
 rump_libos_lwproc_curlwp(void)
 {
+#if 0
 	return rumpuser_curlwp();
+#else
+    return NULL;
+#endif
 }
 
 static void
 rump_libos_hyp_lwpexit(void)
 {
+#if 0
 	struct thread_info *ti = (struct thread_info *)rumpuser_curlwp();
 
 	rumpuser_curlwpop(RUMPUSER_LWP_DESTROY, (struct lwp *)ti);
 	free_thread_info(ti);
+#endif
 }
 
 static pid_t
 rump_libos_hyp_getpid(void)
 {
+#if 0
 	struct thread_info *ti = (struct thread_info *)rumpuser_curlwp();
 
 	return ti->task->pid;
+#else
+    return -1;
+#endif
 }
 
 
@@ -265,6 +285,7 @@ static void rump_libos_user_unschedule(int nlocks, int *countp,
 static void rump_libos_user_schedule(int nlocks, void *interlock) {}
 static void rump_libos_hyp_execnotify(const char *comm) {}
 
+#if 0
 static const struct rumpuser_hyperup hyp = {
 	.hyp_schedule		= rump_schedule,
 	.hyp_unschedule		= rump_unschedule,
@@ -281,7 +302,54 @@ static const struct rumpuser_hyperup hyp = {
 	.hyp_lwpexit		= rump_libos_hyp_lwpexit,
 	.hyp_execnotify		= rump_libos_hyp_execnotify,
 };
+#else
+static void hyp_schedule(void) {}
+static void hyp_unschedule(void) {}
 
+static void hyp_backend_schedule(int nlocks, void *interlock) {}
+static void hyp_backend_unschedule(int nlocks, int *countp, void *interlock) {}
+
+static void hyp_lwproc_switch(struct lwp *newlwp) {}
+static void hyp_lwproc_release(void) {}
+static int hyp_lwproc_newlwp(pid_t pid) { return 0; }
+static struct lwp *hyp_lwproc_curlwp(void) { return NULL; }
+static int hyp_lwproc_rfork(void *priv, int flags, const char *comm) { return 0; }
+static void hyp_lwpexit(void) {}
+
+static pid_t hyp_getpid(void) { return 0; }
+static int hyp_syscall(int num, void *arg, long *retval) {
+    int ret = 0;
+
+    ret = lkl_syscall(num, (long *)arg);
+    if (ret < 0) {
+        retval[0] = -ret;
+        ret = -1;
+    } 
+
+    return ret;
+}
+static void hyp_execnotify(const char *comm) {}
+
+
+static const struct rumpuser_hyperup hyp = {
+    .hyp_schedule = hyp_schedule,
+    .hyp_unschedule = hyp_unschedule,
+
+    .hyp_backend_schedule = hyp_backend_schedule,
+    .hyp_backend_unschedule = hyp_backend_unschedule,
+
+    .hyp_lwproc_switch = hyp_lwproc_switch,
+    .hyp_lwproc_release = hyp_lwproc_release,
+    .hyp_lwproc_newlwp = hyp_lwproc_newlwp,
+    .hyp_lwproc_curlwp = hyp_lwproc_curlwp,
+    .hyp_lwproc_rfork = hyp_lwproc_rfork,
+    .hyp_lwpexit = hyp_lwpexit,    
+
+    .hyp_getpid = hyp_getpid,
+    .hyp_syscall = hyp_syscall,
+    .hyp_execnotify = hyp_execnotify,
+};
+#endif 
 
 struct thrdesc {
 	void (*f)(void *);
@@ -467,10 +535,13 @@ char *boot_cmdline = "";	/* FIXME: maybe we have rump_set_boot_cmdline? */
 
 int rump_init(void)
 {
+
+#if 0
 	if (rumpuser_init(RUMPUSER_VERSION, &hyp) != 0) {
 		pr_warn("rumpuser init failed\n");
 		return EINVAL;
 	}
+#endif
 
 	rumpuser_mutex_init(&thrmtx, RUMPUSER_MTX_SPIN);
 	rumpuser_cv_init(&thrcv);
@@ -478,7 +549,10 @@ int rump_init(void)
 
 	lkl_start_kernel(&lkl_host_ops, LKL_MEM_SIZE, boot_cmdline);
 
-	rump_thread_allow(NULL);
+	rumpuser_mutex_enter(thrmtx);
+    threads_are_go = true;
+	rumpuser_cv_broadcast(thrcv);
+	rumpuser_mutex_exit(thrmtx);
 
 	pr_info("rumpuser started.\n");
 	return 0;
