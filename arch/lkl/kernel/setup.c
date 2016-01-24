@@ -24,7 +24,7 @@ extern char lkl_virtio_devs[];
 
 long lkl_panic_blink(int state)
 {
-	rumpuser_exit(RUMPUSER_PANIC);
+    lkl_ops->panic();
 	return 0;
 }
 
