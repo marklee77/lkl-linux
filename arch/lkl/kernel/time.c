@@ -88,11 +88,9 @@ static int clockevent_set_state_shutdown(struct clock_event_device *evt)
 
 static int clockevent_set_state_oneshot(struct clock_event_device *evt)
 {
-#ifdef LKL_TIMER
 	timer = lkl_ops->timer_alloc(timer_fn, NULL);
 	if (!timer)
 		return -ENOMEM;
-#endif
 	return 0;
 }
 
@@ -110,13 +108,7 @@ static int clockevent_next_event(unsigned long hz,
 {
 	unsigned long ns = 1000000000 * hz / HZ;
 
-#ifdef LKL_TIMER
 	return lkl_ops->timer_set_oneshot(timer, ns);
-#else
-	/* FIXME: maybe will rewrite with rumpuer-based timer thread */
-	timer = rump_add_timer(ns, timer_fn, NULL);
-	return timer ? 0 : -1;
-#endif
 }
 
 static struct clock_event_device clockevent = {

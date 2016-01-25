@@ -432,6 +432,15 @@ void *rump_add_timer(__u64 ns, void (*func) (void *arg), void *arg)
 	return td;
 }
 
+static void *timer_alloc(void (*fn)(void *), void *arg) {
+	return fn;
+}
+
+static int timer_set_oneshot(void *timer_fn, unsigned long ns)
+{
+	return rump_add_timer(ns, (void (*)(void *))timer_fn, NULL) ? 0 : -1;
+}
+
 void rump_timer_cancel(void *timer)
 {
 	struct thrdesc *td = timer;
@@ -547,6 +556,8 @@ int rump_init(void)
 	rumpuser_cv_init(&thrcv);
 	threads_are_go = false;
 
+	lkl_host_ops.timer_alloc = timer_alloc;
+	lkl_host_ops.timer_set_oneshot = timer_set_oneshot;
 	lkl_start_kernel(&lkl_host_ops, LKL_MEM_SIZE, boot_cmdline);
 
 	rumpuser_mutex_enter(thrmtx);
