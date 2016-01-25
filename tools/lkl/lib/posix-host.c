@@ -15,13 +15,11 @@
 #include <lkl_host.h>
 #include "iomem.h"
 
-int __platform_write(int, const void *, size_t);
-
 static void print(const char *str, int len)
 {
 	int ret __attribute__((unused));
 
-	ret = __platform_write(STDOUT_FILENO, str, len);
+	ret = write(STDOUT_FILENO, str, len);
 }
 
 struct pthread_sem {
