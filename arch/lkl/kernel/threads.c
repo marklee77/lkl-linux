@@ -3,8 +3,6 @@
 #include <linux/sched.h>
 #include <asm/host_ops.h>
 
-#include "rump.h"
-
 static int threads_counter;
 static void *threads_counter_lock;
 

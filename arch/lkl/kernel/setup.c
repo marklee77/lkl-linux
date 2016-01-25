@@ -9,8 +9,6 @@
 #include <asm/unistd.h>
 #include <asm/syscalls.h>
 
-#include "rump.h"
-
 struct lkl_host_operations *lkl_ops;
 static char cmd_line[COMMAND_LINE_SIZE];
 static void *idle_sem;
@@ -135,7 +133,6 @@ long lkl_sys_halt(void)
 	if (!halt_sem)
 		return -ENOMEM;
 
-	rumpuser_exit(0);
 	err = lkl_syscall(__NR_reboot, params);
 	if (err < 0) {
 		lkl_ops->sem_free(halt_sem);
