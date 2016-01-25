@@ -92,7 +92,7 @@ int __init lkl_start_kernel(struct lkl_host_operations *ops,
 		goto out_free_init_sem;
 	}
 
-	ret = lkl_ops->thread_create((void * (*)(void *))lkl_run_kernel, NULL);
+	ret = lkl_ops->thread_create(lkl_run_kernel, NULL);
 	if (ret) {
 		ret = -ENOMEM;
 		goto out_free_idle_sem;
