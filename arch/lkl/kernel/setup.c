@@ -24,7 +24,7 @@ extern char lkl_virtio_devs[];
 
 long lkl_panic_blink(int state)
 {
-    lkl_ops->panic();
+	lkl_ops->panic();
 	return 0;
 }
 
@@ -92,8 +92,7 @@ int __init lkl_start_kernel(struct lkl_host_operations *ops,
 		goto out_free_init_sem;
 	}
 
-	ret = rumpuser_thread_create((void * (*)(void *))lkl_run_kernel, NULL,
-				     "lkl_init", 0, 1, -1, &thr);
+	ret = lkl_ops->thread_create((void * (*)(void *))lkl_run_kernel, NULL);
 	if (ret) {
 		ret = -ENOMEM;
 		goto out_free_idle_sem;
@@ -159,7 +158,7 @@ void arch_cpu_idle(void)
 		free_IRQ();
 		free_mem();
 		lkl_ops->sem_up(halt_sem);
-		rumpuser_thread_exit();
+		lkl_ops->thread_exit();
 	}
 
 	lkl_ops->sem_down(idle_sem);

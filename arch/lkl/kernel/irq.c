@@ -41,14 +41,14 @@ int lkl_trigger_irq(int irq, void *data)
 	if (irq >= NR_IRQS)
 		return -EINVAL;
 
-	rump_sem_down(irqs_lock);
+	lkl_ops->sem_down(irqs_lock);
 	if (irqs[irq].count < MAX_IRQS) {
 		irqs[irq].regs[irqs[irq].count] = regs;
 		irqs[irq].count++;
 	} else {
 		ret = -EOVERFLOW;
 	}
-	rump_sem_up(irqs_lock);
+	lkl_ops->sem_up(irqs_lock);
 
 	wakeup_cpu();
 
@@ -59,13 +59,13 @@ static void run_irqs(void)
 {
 	int i, j;
 
-	rump_sem_down(irqs_lock);
+	lkl_ops->sem_down(irqs_lock);
 	for (i = 0; i < NR_IRQS; i++) {
 		for (j = 0; j < irqs[i].count; j++)
 			do_IRQ(i, &irqs[i].regs[j]);
 		irqs[i].count = 0;
 	}
-	rump_sem_up(irqs_lock);
+	lkl_ops->sem_up(irqs_lock);
 }
 
 int show_interrupts(struct seq_file *p, void *v)
@@ -115,7 +115,7 @@ void arch_local_irq_restore(unsigned long flags)
 
 void free_IRQ(void)
 {
-	rump_sem_free(irqs_lock);
+	lkl_ops->sem_free(irqs_lock);
 }
 
 static int lkl_irq_request_resource(struct irq_data *data)
@@ -152,7 +152,7 @@ void init_IRQ(void)
 {
 	int i;
 
-	irqs_lock = rump_sem_alloc(1);
+	irqs_lock = lkl_ops->sem_alloc(1);
 	BUG_ON(!irqs_lock);
 
 	for (i = 0; i < NR_IRQS; i++)

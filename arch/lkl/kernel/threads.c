@@ -118,7 +118,7 @@ struct task_struct *__switch_to(struct task_struct *prev,
 	if (ei.dead) {
 		lkl_ops->sem_free(ei.sched_sem);
 		threads_counter_dec();
-		rumpuser_thread_exit();
+		lkl_ops->thread_exit();
 	}
 
 	_prev->exit_info = NULL;
@@ -164,8 +164,7 @@ int copy_thread(unsigned long clone_flags, unsigned long esp,
 	tba->arg = (void *)unused;
 	tba->ti = ti;
 
-	ret = rumpuser_thread_create((void * (*)(void *))thread_bootstrap, tba,
-				     "thread", 0, 1, -1, &thr);
+	ret = lkl_ops->thread_create((void * (*)(void *))thread_bootstrap, tba);
 	if (ret) {
 		kfree(tba);
 		return -ENOMEM;

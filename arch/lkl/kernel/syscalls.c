@@ -61,7 +61,7 @@ static long run_syscall(struct syscall *s)
 	task_work_run();
 
 	if (s->sem)
-		rump_sem_up(s->sem);
+		lkl_ops->sem_up(s->sem);
 	return ret;
 }
 
@@ -84,7 +84,7 @@ int run_syscalls(void)
 	}
 
 	s->ret = 0;
-	rump_sem_up(s->sem);
+	lkl_ops->sem_up(s->sem);
 
 	return 0;
 }
@@ -116,14 +116,14 @@ long lkl_syscall(long no, long *params)
 	s.no = no;
 	s.params = params;
 
-	s.sem = rump_sem_alloc(0);
+	s.sem = lkl_ops->sem_alloc(0);
 	if (!s.sem)
 		return -ENOMEM;
 
 	lkl_trigger_irq(syscall_irq, &s);
 
-	rump_sem_down(s.sem);
-	rump_sem_free(s.sem);
+	lkl_ops->sem_down(s.sem);
+	lkl_ops->sem_free(s.sem);
 
 	return s.ret;
 }
