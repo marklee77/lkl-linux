@@ -11,8 +11,6 @@
 #include <asm/host_ops.h>
 #include <asm/syscalls.h>
 
-#include "rump.h"
-
 typedef long (*syscall_handler_t)(long arg1, ...);
 
 #undef __SYSCALL
