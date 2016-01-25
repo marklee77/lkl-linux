@@ -66,7 +66,7 @@ endef
 
 all: lkl.o
 
-lkl.o: arch/lkl/kernel/rump_syscalls.c vmlinux
+lkl.o: vmlinux
 #	$(OBJCOPY) -R .eh_frame $(foreach sym,$(LKL_ENTRY_POINTS),-G$(prefix)$(sym)) vmlinux lkl.o
 	$(call make_ns_symbols,vmlinux,lkl.o)
 

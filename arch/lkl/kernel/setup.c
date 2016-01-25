@@ -135,7 +135,7 @@ long lkl_sys_halt(void)
 	if (!halt_sem)
 		return -ENOMEM;
 
-	rump_exit();
+	rumpuser_exit(0);
 	err = lkl_syscall(__NR_reboot, params);
 	if (err < 0) {
 		lkl_ops->sem_free(halt_sem);
