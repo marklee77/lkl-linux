@@ -42,7 +42,7 @@ KBUILD_CFLAGS += -Iarch/lkl/kernel
 
 LDFLAGS_vmlinux += -r
 LKL_ENTRY_POINTS := lkl_start_kernel lkl_sys_halt lkl_syscall lkl_trigger_irq \
-	lkl_get_free_irq lkl_put_irq rump_init
+	lkl_get_free_irq lkl_put_irq
 
 core-y += arch/lkl/kernel/
 core-y += arch/lkl/drivers/
