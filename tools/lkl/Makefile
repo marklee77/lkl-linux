@@ -54,8 +54,6 @@ all: $(lib) $(execs)
 install:
 	install -D lib/liblinux.a ${DESTDIR}/lib/
 	mkdir -p ${DESTDIR}/include/linux/
-	install -D ../../arch/lkl/include/linux/rump_syscalls.h \
-		${DESTDIR}/include/linux/
 
 lib/liblkl.a: $(lib_objs) lib/lkl.o
 	$(AR) -rc $@ $^
